@@ -1,47 +1,46 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div id="app">
+    <div>
+      <component :is="layout">
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
+      </component>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  </div>
 </template>
 
-<style scoped>
-header {
+<script>
+const userpages_layout = "userpages";
+const default_layout = "default";
+const default_cs_layout = "cs";
+
+export default {
+  name: "App",
+  computed: {
+    layout() {
+      return ((this.$route.meta.layout) ? (this.$route.meta.layout) : userpages_layout) + "-layout" ;
+    }
+  },
+};
+</script>
+
+<style>
+#app {
+  font-family: Roboto, Inter var, ui-sans-serif, system-ui, -apple-system,
+  BlinkMacSystemFont, Segoe UI, Helvetica Neue, Arial, Noto Sans, sans-serif,
+  Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   line-height: 1.5;
+  font-weight: 400;
+  color: #212121 !important;
+  font-size: 14px;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.modal-backdrop {
+  opacity: 0.5;
 }
+</style>
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
+<style lang="scss">
+@import "assets/base.scss";
 </style>
