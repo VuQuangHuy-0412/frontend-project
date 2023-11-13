@@ -129,7 +129,7 @@ import Configuration from "@/configuration";
 import QrcodeVue from 'qrcode.vue'
 import baseMixins from "@/components/mixins/base";
 import { FETCH_BANKS } from '@/store/action.type';
-import { sendMessage, getGchatTokenFromIframe } from '@/common/IframeHelper';
+// import { sendMessage, getGchatTokenFromIframe } from '@/common/IframeHelper';
 
 // utility
 import { mapGetters } from 'vuex'
@@ -174,7 +174,7 @@ export default {
     if (this.$router.history.current.query.token) {
       this.listenGchatEvent()
 
-      sendMessage({type: 'content_ready', payload: {status: true}}, null)
+      // sendMessage({type: 'content_ready', payload: {status: true}}, null)
 
       this.$router.push({ path: '/cs/money-not-received' })
     }
@@ -209,11 +209,11 @@ export default {
   methods: {
     saveGchatToken() {
       StorageService.destroy('ewallet_gchat_token_test');
-      let gchatToken = this.$router.currentRoute ? this.$router.currentRoute.query.token : (getGchatTokenFromIframe() ? getGchatTokenFromIframe() : null)
-      if (gchatToken) {
-        localStorage.setItem('ewallet_gchat_token_test', gchatToken)
-        this.loginFromGchat = true
-      }
+      // let gchatToken = this.$router.currentRoute ? this.$router.currentRoute.query.token : (getGchatTokenFromIframe() ? getGchatTokenFromIframe() : null)
+      // if (gchatToken) {
+      //   localStorage.setItem('ewallet_gchat_token_test', gchatToken)
+      //   this.loginFromGchat = true
+      // }
     },
     listenGchatEvent() {
       let eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent'

@@ -1,8 +1,8 @@
 {
-  "name": "frontend-project",
+  "name": "ewallet-web-admin",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "huyvq183930",
+  "author": "GHTK\\hoangnm75 <hoangnm75@ghtk.co>",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --mode development --port=8099 --host localhost",
