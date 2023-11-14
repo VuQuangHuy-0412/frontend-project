@@ -9,7 +9,7 @@ export const ENV_LOCAL = 'local';
 // if (location.hostname === "localhost") {
 //   apiUrl = 'http://localhost:8084';
 // } else {
-  apiUrl = 'https://ewallet-admin-dev.ghtklab.com';
+  apiUrl = 'https://localhost:8084';
   // apiUrl = 'http://172.16.50.74:8084';
 // }
 // if (ENV == 'product') {

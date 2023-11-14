@@ -13,7 +13,7 @@ export default {
   },
   methods: {
     query(resource, params) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource
         .get(resource, {
           params: params,
@@ -38,7 +38,7 @@ export default {
     },
 
     queryWithBigInt(resource, params) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource
         .get(resource, { params: params, transformResponse: (r) => r }).then((response) => {
           return parseDataFromStringV2(response)
@@ -60,7 +60,7 @@ export default {
     },
 
     get(resource, slug = '', option) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource
         .get(`${resource}${slug ? `/${slug}` : ''}`, {
           ...option,
@@ -88,7 +88,7 @@ export default {
     },
 
     getWithBigInt(resource, slug = '', option) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource
         .get(`${resource}${slug ? `/${slug}` : ''}`, {
           ...option,
@@ -115,7 +115,7 @@ export default {
     },
 
     post(resource, params, option) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource.post(`${resource}`, params, {
         ...option,
         transformResponse: (r) => {
@@ -145,7 +145,7 @@ export default {
     },
 
     postV2(resource, params, option) {
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       return httpResource.post(`${resource}`, params, {
         ...option,
         transformResponse: (r) => {

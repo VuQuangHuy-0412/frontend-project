@@ -6,14 +6,15 @@
           <div class="h5 modal-title text-center">
             <div>
               <img
-                  src="@/assets/static/images/logo-2.png"
-                  alt="GHTK"
-                  width="500px"
+                  src="@/assets/static/images/logo-soict-hust-1.png"
+                  alt="SOICT"
+                  width="300px"
                   class="brand-img"
               />
+              <div style="display: inline-block; text-align: left"><b>ĐẠI HỌC BÁCH KHOA HÀ NỘI <br/>TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG</b></div>
             </div>
             <h4 class="mt-2">
-              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÍ ĐIỆN TỬ GHTK PAY</span>
+              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÀ PHÂN CÔNG GIẢNG DẠY</span>
             </h4>
           </div>
           <div class="modal-dialog w-100 mx-auto">
@@ -107,7 +108,7 @@
             </div>
           </div>
           <div class="text-center opacity-8 mt-3">
-            Copyright &copy; GHTK {{ new Date().getFullYear() }}
+            Copyright &copy; SOICT {{ new Date().getFullYear() }}
           </div>
         </div>
 
@@ -118,9 +119,7 @@
 </template>
 
 <script>
-import {
-  getAuthenticatedUser
-} from "../common/utils";
+import {getAuthenticatedUser} from "../common/utils";
 import axios from "axios";
 import StorageService from "../common/storage.service";
 import router from "../router/index";
@@ -128,13 +127,12 @@ import {EventBus} from "@/common/event-bus";
 import Configuration from "@/configuration";
 import QrcodeVue from 'qrcode.vue'
 import baseMixins from "@/components/mixins/base";
-import { FETCH_BANKS } from '@/store/action.type';
+import {FETCH_BANKS} from '@/store/action.type';
 // import { sendMessage, getGchatTokenFromIframe } from '@/common/IframeHelper';
-
 // utility
-import { mapGetters } from 'vuex'
+import {mapGetters} from 'vuex'
 
-const API_EWALLET = Configuration.value("ewalletAdminURL");
+const API_SC5 = Configuration.value("sc5AdminURL");
 
 const NEW_BANKS = [
   { value: 'CHB', text: 'CHB - SHINHAN VINA BANK' },
@@ -329,7 +327,7 @@ export default {
 
       this.loadingButton = true;
       axios
-        .post(`${API_EWALLET}/login/${this.needRegisterSmartOtp ? 'active-soft-otp' : 'verify-soft-otp'}`, {
+        .post(`${API_SC5}/login/${this.needRegisterSmartOtp ? 'active-soft-otp' : 'verify-soft-otp'}`, {
           requestId: this.requestId,
           otp: this.$refs.otpInput.otp.join('')
         })
@@ -397,7 +395,7 @@ export default {
       }
       this.loadingButton = true;
       axios
-        .post(`${API_EWALLET}/login/enroll-soft-otp`, {
+        .post(`${API_SC5}/login/enroll-soft-otp`, {
           requestId: this.requestId,
           otp: this.$refs.otpInput.otp.join('')
         })
@@ -429,7 +427,7 @@ export default {
       this.loadingButton = true;
       EventBus.$emit("send-progress", true);
       axios
-        .post(`${API_EWALLET}/login`, this.form)
+        .post(`${API_SC5}/login`, this.form)
         .then(async (response) => {
           EventBus.$emit("close-progress", true);
           if (response.status === 200) {

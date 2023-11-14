@@ -11,7 +11,7 @@ import {
 import baseMixins from "../components/mixins/base";
 import { SUCCESS } from "../common/config";
 
-const API_ADMIN_EWALLET = Configuration.value("ewalletAdminURL");
+const API_ADMIN_SC5 = Configuration.value("sc5AdminURL");
 
 const state = {
   files: [],
@@ -55,7 +55,7 @@ const actions = {
   },
   [DOWNLOAD_FILE_EXPORT](context, params) {
     return axios({
-      url: `${API_ADMIN_EWALLET}/file/download`,
+      url: `${API_ADMIN_SC5}/file/download`,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': StorageService.get('ewallet_token')
@@ -75,7 +75,7 @@ const actions = {
   },
   [DOWNLOAD_FILE_AR](context, params) {
     return axios({
-      url: `${API_ADMIN_EWALLET}/bill-ar/file/download`,
+      url: `${API_ADMIN_SC5}/bill-ar/file/download`,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': StorageService.get('ewallet_token')
@@ -95,7 +95,7 @@ const actions = {
   },
   [DOWNLOAD_FILE_WITH_NAME](context, params) {
     return axios({
-      url: `${API_ADMIN_EWALLET}/file/download-with-file-name?file_name=${params.fileName}`,
+      url: `${API_ADMIN_SC5}/file/download-with-file-name?file_name=${params.fileName}`,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': StorageService.get('ewallet_token')

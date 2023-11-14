@@ -74,7 +74,7 @@ router.onError(error => {
   }
 });
 
-const DEFAULT_TITLE = 'Ewallet web admin'
+const DEFAULT_TITLE = 'SC5 web admin'
 router.afterEach((to, from) => {
   Vue.nextTick(() => {
     document.title = to.meta.title || DEFAULT_TITLE

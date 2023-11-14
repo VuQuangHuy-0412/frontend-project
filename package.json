@@ -1,8 +1,8 @@
 {
-  "name": "ewallet-web-admin",
+  "name": "sc5-web-admin",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "GHTK\\hoangnm75 <hoangnm75@ghtk.co>",
+  "author": "huy.vq183930 <huy.vq183930@sis.hust.edu.vn>",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --mode development --port=8099 --host localhost",

@@ -34,7 +34,7 @@ const mutations = {
 
 const actions = {
   fetchRoles(context) {
-    httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+    httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
     return new Promise((resolve, reject) => {
       httpResource.get('/role/list')
         .then(response => {
@@ -53,7 +53,7 @@ const actions = {
     })
   },
   fetchAllRoles(context) {
-    httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+    httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
     return new Promise((resolve, reject) => {
       httpResource.get('/role/list')
         .then(response => {
@@ -68,7 +68,7 @@ const actions = {
     })
   },
   [FETCH_PERMISSION]() {
-    httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+    httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
     return new Promise((resolve, reject) => {
       httpResource.get('/permission/list')
         .then(response => {

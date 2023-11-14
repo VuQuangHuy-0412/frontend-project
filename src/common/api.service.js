@@ -4,7 +4,7 @@ import VueAxios from 'vue-axios';
 import StorageService from '@/common/storage.service';
 
 Vue.use(VueAxios, axios);
-var baseUrl = process.env.API_EWALLET_ADMIM;
+var baseUrl = process.env.API_SC5_ADMIM;
 var instanceApiService = Vue.axios.create({
   baseURL: baseUrl,
   headers: {

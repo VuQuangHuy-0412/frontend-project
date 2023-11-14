@@ -6,7 +6,7 @@ export default class Configuration {
   static get CONFIG() {
     // must have format $VUE_APP_XXX
     return {
-      ewalletAdminURL: "https://ewallet-admin.ghtkpaylab.com",
+      sc5AdminURL: "http://localhost:8084",
       // ewalletJobManagerURL: "https://ewallet-job-manager.ghtkpaylab.com",
       // ewalletJobManagerURL: "$VUE_APP_EWALLET_ADMIN_JOB_URL",
       // ewalletAdminURL: "$VUE_APP_EWALLET_ADMIN_URL",

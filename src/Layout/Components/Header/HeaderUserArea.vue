@@ -190,7 +190,7 @@ import axios from "axios";
 import StorageService from "@/common/storage.service";
 import router from "@/router";
 import Configuration from "@/configuration";
-const API_EWALLET = Configuration.value("ewalletAdminURL");
+const API_SC5 = Configuration.value("sc5AdminURL");
 
 const initChangePassword = {
   oldPassword: "",
@@ -268,7 +268,7 @@ export default {
         color: '#069255'
       });
       axios
-          .post(`${API_EWALLET}/login`, {
+          .post(`${API_SC5}/login`, {
             username: JSON.parse(localStorage.getItem('userInfo')).username,
             password: this.changePasswordPayload.newPassword
           })

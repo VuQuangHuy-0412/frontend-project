@@ -142,7 +142,7 @@ export async function logout() {
   let token = StorageService.get("Token");
   if (token) {
     token = JSON.parse(token);
-    httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+    httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
     await httpResource.post("/logout", token.refreshToken, { headers: { "Content-Type": "text/plain" } });
     StorageService.destroy("ewallet_token");
     StorageService.destroy("Token");
@@ -158,7 +158,7 @@ export async function refreshTokenInternal() {
     let token = StorageService.get("Token");
     if (token) {
       token = JSON.parse(token);
-      httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+      httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
       const response = await httpResource.post("/auth/token/refresh", token.refreshToken, {headers: {"Content-Type": "text/plain"}});
       if (response.status !== 200) {
         performLogout();
@@ -176,13 +176,13 @@ export async function refreshTokenInternal() {
 }
 
 export async function checkToken() {
-  httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+  httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
   const response = await httpResource.get("/profile", {headers: authHeader()});
   return response.status;
 }
 
 export async function getAuthenticatedUser() {
-  httpResource.defaults.baseURL = Configuration.value("ewalletAdminURL");
+  httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
   try {
     const response = await httpResource.get("/profile", {headers: authHeader()});
     if (response.status === 200) {
