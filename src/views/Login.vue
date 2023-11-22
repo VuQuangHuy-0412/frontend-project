@@ -5,17 +5,26 @@
         <div class="mx-auto app-login-box">
           <div class="h5 modal-title text-center">
             <div>
+<!--              <img-->
+<!--                  src="@/assets/static/images/logo-soict-hust-1.png"-->
+<!--                  alt="SOICT"-->
+<!--                  width="300px"-->
+<!--                  class="brand-img"-->
+<!--              />-->
               <img
-                  src="@/assets/static/images/logo-soict-hust-1.png"
-                  alt="SOICT"
-                  width="300px"
+                  src="@/assets/static/images/logo-2.png"
+                  alt="GHTK"
+                  width="500px"
                   class="brand-img"
               />
-              <div style="display: inline-block; text-align: left"><b>ĐẠI HỌC BÁCH KHOA HÀ NỘI <br/>TRƯỜNG CÔNG NGHỆ
-                THÔNG TIN VÀ TRUYỀN THÔNG</b></div>
+<!--              <div style="display: inline-block; text-align: left"><b>ĐẠI HỌC BÁCH KHOA HÀ NỘI <br/>TRƯỜNG CÔNG NGHỆ-->
+<!--                THÔNG TIN VÀ TRUYỀN THÔNG</b></div>-->
             </div>
+<!--            <h4 class="mt-2">-->
+<!--              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÀ PHÂN CÔNG GIẢNG DẠY</span>-->
+<!--            </h4>-->
             <h4 class="mt-2">
-              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÀ PHÂN CÔNG GIẢNG DẠY</span>
+              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÍ ĐIỆN TỬ GHTK PAY</span>
             </h4>
           </div>
           <div class="modal-dialog w-100 mx-auto">
@@ -81,6 +90,9 @@ import Configuration from "@/configuration";
 import baseMixins from "@/components/mixins/base";
 // utility
 import {mapGetters} from 'vuex'
+import router from "@/router";
+import StorageService from "@/common/storage.service";
+import {getAuthenticatedUser} from "@/common/utils";
 
 const API_SC5 = Configuration.value("sc5AdminURL");
 
@@ -128,7 +140,20 @@ export default {
             EventBus.$emit("close-progress", true);
             if (response.status === 200) {
               this.loadingButton = false;
-              this.requestId = response.data.requestId;
+
+              StorageService.save("sc5_token", response.data.accessToken);
+              StorageService.save("Token", JSON.stringify(response.data));
+
+              await getAuthenticatedUser();
+              this.$message.closeAll();
+
+              router.push("/").catch((e) => {
+                this.$message({
+                  message: 'Đã có lỗi xảy ra',
+                  type: "warning",
+                  showClose: true,
+                });
+              });
             }
           })
           .catch((error) => {
