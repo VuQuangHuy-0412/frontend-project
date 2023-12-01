@@ -58,7 +58,7 @@ const actions = {
       url: `${API_ADMIN_SC5}/file/download`,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': StorageService.get('ewallet_token')
+        'Authorization': StorageService.get('sc5_token')
       },
       method: 'GET',
       params: params,
@@ -78,7 +78,7 @@ const actions = {
       url: `${API_ADMIN_SC5}/bill-ar/file/download`,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': StorageService.get('ewallet_token')
+        'Authorization': StorageService.get('sc5_token')
       },
       method: 'GET',
       params: params,
@@ -98,7 +98,7 @@ const actions = {
       url: `${API_ADMIN_SC5}/file/download-with-file-name?file_name=${params.fileName}`,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': StorageService.get('ewallet_token')
+        'Authorization': StorageService.get('sc5_token')
       },
       method: 'GET',
       params: params,

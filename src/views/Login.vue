@@ -144,6 +144,8 @@ export default {
               StorageService.save("sc5_token", response.data.accessToken);
               StorageService.save("Token", JSON.stringify(response.data));
 
+              console.log(StorageService.get("Token"));
+
               await getAuthenticatedUser();
               this.$message.closeAll();
 

@@ -10,7 +10,7 @@ var instanceApiService = Vue.axios.create({
   headers: {
     "Accept": "application/json",
     "Content-Type": "application/json",
-    "Authorization": StorageService.get('paygate_token')
+    "Authorization": StorageService.get('sc5_token')
   }
 });
 

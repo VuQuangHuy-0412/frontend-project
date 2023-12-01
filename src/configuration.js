@@ -7,12 +7,6 @@ export default class Configuration {
     // must have format $VUE_APP_XXX
     return {
       sc5AdminURL: "http://localhost:8084",
-      // ewalletJobManagerURL: "https://ewallet-job-manager.ghtkpaylab.com",
-      // ewalletJobManagerURL: "$VUE_APP_EWALLET_ADMIN_JOB_URL",
-      // ewalletAdminURL: "$VUE_APP_EWALLET_ADMIN_URL",
-      // ewalletAdminCSGroup: "$VUE_APP_EWALLET_ADMIN_CS_GROUP",
-      // ewalletAdminStaffGroup: "$VUE_APP_EWALLET_STAFF_GROUP",
-      // ewalletAdminURL: "http://172.16.50.74:8084",
     };
   }
 

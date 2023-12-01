@@ -16,7 +16,7 @@ const instance = axios.create({
 
 const requestHandler = request => {
   EventBus.$emit("send-progress", true)
-  request.headers["Authorization"] = StorageService.get('ewallet_token')
+  request.headers["Authorization"] = StorageService.get('sc5_token')
   if (isHandlerEnable(request)) {
     // console.log("Request Interceptor", request);
   }
