@@ -473,7 +473,7 @@ const initData = {
 }
 export default {
   name: "Accounts",
-  // components: {ModalCreateWalletCompartment, PageTitle, DatePicker },
+  components: {PageTitle, DatePicker },
   mixins: [baseMixins],
   data() {
     return {

@@ -59,7 +59,51 @@ export default {
               permission: 'account_list'
             }
           ],
-        }
+        },
+        // {
+        //   title: "Quản lý giảng viên",
+        //   icon: 'fa fa-wallet',
+        //   child: [
+        //     {
+        //       href: "/admin/teachers",
+        //       title: "Danh sách giảng viên",
+        //       permission: 'teacher_search'
+        //     }
+        //   ],
+        // },
+        // {
+        //   title: "Quản lý nhóm chuyên môn",
+        //   icon: 'fa fa-wallet',
+        //   child: [
+        //     {
+        //       href: "/admin/group-teachers",
+        //       title: "Danh sách nhóm chuyên môn",
+        //       permission: 'group_teacher_search'
+        //     }
+        //   ],
+        // },
+        // {
+        //   title: "Quản lý lớp học",
+        //   icon: 'fa fa-wallet',
+        //   child: [
+        //     {
+        //       href: "/admin/classes",
+        //       title: "Danh sách lớp học",
+        //       permission: 'class_search'
+        //     }
+        //   ],
+        // },
+        // {
+        //   title: "Quản lý sinh viên đăng kí đồ án",
+        //   icon: 'fa fa-wallet',
+        //   child: [
+        //     {
+        //       href: "/admin/student-projects",
+        //       title: "Danh sách sinh viên đăng kí đồ án",
+        //       permission: 'student_project_search'
+        //     }
+        //   ],
+        // },
       ],
       collapsed: true,
 
@@ -72,16 +116,6 @@ export default {
     sidebarbg: String,
   },
   methods: {
-    toggleBodyClass(className) {
-      const el = document.body;
-      this.isOpen = !this.isOpen;
-
-      if (this.isOpen) {
-        el.classList.add(className);
-      } else {
-        el.classList.remove(className);
-      }
-    },
     toggleSidebar(className) {
       const el = document.body;
       this.sidebarActive = !this.sidebarActive;
