@@ -355,3 +355,56 @@ body {
   border-radius: 5px;
   border: 1px solid #ff7851 !important;
 }
+.invalid-date-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 80%;
+  color: #ff7851;
+}
+.invalid-editor-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 80%;
+  color: #ff7851;
+}
+.invalid-date {
+  .invalid-date-feedback {
+    display: block !important;
+  }
+}
+.invalid-editor {
+  .invalid-editor-feedback {
+    display: block !important;
+  }
+}
+.ghtk-modal {
+  .modal__header {
+    background-color: #219653;
+    color: white;
+    height: 3rem;
+    position: relative;
+    padding: 0 !important;
+    width: 100%;
+    .modal__header--item {
+      position: absolute;
+      height: 3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .title {
+      width: 100%;
+      font-size: 1.2rem;
+    }
+    .close-btn {
+      font-size: 1.2rem;
+      right: 0;
+      cursor: pointer;
+    }
+  }
+  .custom-full-btn {
+    width: 100% !important;
+  }
+}

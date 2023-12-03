@@ -41,6 +41,12 @@ const router = new Router({
       component: () => import("@/views/Accounts"),
       meta: { title: 'Quản lý tài khoản', layout: 'default' }
     },
+    {
+      path: '/admin/teachers',
+      name: 'Teachers',
+      component: () => import("@/views/Teachers"),
+      meta: { title: 'Quản lý giảng viên', layout: 'default' }
+    },
   ]
 });
 router.beforeEach((to, from, next) => {

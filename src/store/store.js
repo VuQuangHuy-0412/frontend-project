@@ -7,6 +7,7 @@ import log from "./adminlog.module"
 import accounts from "./account.module"
 import file from "./file.module"
 import event from "./event.module"
+import teacher from "./teacher.module"
 
 Vue.use(Vuex);
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
     role: role,
     log: log,
     accounts,
+    teacher,
     file,
     event,
   }
