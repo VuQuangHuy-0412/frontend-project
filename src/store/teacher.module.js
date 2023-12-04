@@ -1,5 +1,7 @@
 import {
+  CREATE_TEACHER,
   FETCH_TEACHERS,
+  UPDATE_TEACHER,
 } from "./action.type";
 import { SUCCESS } from "@/common/config"
 import baseMixins from "../components/mixins/base"
@@ -31,6 +33,18 @@ const actions = {
       } else {
         resolve(null)
       }
+    })
+  },
+  [CREATE_TEACHER](context, payload) {
+    return new Promise(async resolve => {
+      let response = await baseMixins.methods.post('/teacher/create', payload)
+      resolve(response)
+    })
+  },
+  [UPDATE_TEACHER](context, payload) {
+    return new Promise(async resolve => {
+      let response = await baseMixins.methods.post('/teacher/update', payload)
+      resolve(response)
     })
   },
 }

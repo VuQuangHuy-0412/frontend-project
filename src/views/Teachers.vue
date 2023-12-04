@@ -53,15 +53,19 @@
           </b-col>
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
-              <font-awesome-icon :icon="['fas', 'search']" />
+              <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
             </b-button>
-            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="uploadFileTeachers" style="border: none">
+            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadTeacher"
+                      style="border: none">
               <font-awesome-icon :icon="['fas','file-excel']"/>
-              Upload file
+              <span v-if="!loadingFile"
+              ><i class="fas fa-upload"></i> Upload file
+              </span>
+              <i v-if="loadingFile" class="fa fa-spinner fa-spin"/>
             </b-button>
             <b-button class="mr-2" variant="light" @click="handleReset">
-              <font-awesome-icon :icon="['fas', 'eraser']" />
+              <font-awesome-icon :icon="['fas', 'eraser']"/>
               Xóa lọc
             </b-button>
           </b-col>
@@ -71,7 +75,7 @@
                 variant="primary"
                 class="custom-btn-add-common"
                 style="background: orange; border: none"
-                @click="openModalCreateTeacherCompartment"
+                @click="openModalCreateTeacherCompartment(null, false)"
             >
               <font-awesome-icon :icon="['fas','plus']"/>
               Thêm giảng viên
@@ -97,31 +101,40 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
-<!--          <template #cell(userReferenceType)="row">-->
-<!--          <span v-if="row.item.userReferenceType === 'master'">-->
-<!--            Chính-->
-<!--          </span>-->
-<!--            <span v-if="row.item.userReferenceType === 'sub'">-->
-<!--            Chi nhánh-->
-<!--          </span>-->
-<!--          </template>-->
-<!--          <template #cell(actions)="row" style="text-align: center">-->
-<!--            <div class="d-flex justify-content-center flex-wrap">-->
-<!--              <a-->
-<!--                  v-if="userInfo && userInfo.permissions.indexOf('account_init_un_hold_balance') !== -1"-->
-<!--                  href="javascript:void(0)"-->
-<!--                  class="m-1"-->
-<!--                  :class="row.item.holdBalance > 0 ? 'color-active' : 'disabled-icon'"-->
-<!--                  type="button"-->
-<!--                  title="Giải phóng số dư"-->
-<!--                  v-b-tooltip.hover-->
-<!--                  @click.prevent="row.item.holdBalance > 0 && openModalActionBalance(row.item, 'UN_HOLD')">-->
-<!--                <font-awesome-icon :icon="['fas', 'hand-holding']"/>-->
-<!--              </a>-->
-<!--            </div>-->
-<!--          </template>-->
+          <template #cell(rankAndDegree)="row">
+          <span v-if="row.item.rankAndDegree === 'GV'">
+            Giảng viên
+          </span>
+            <span v-if="row.item.rankAndDegree === 'ThS'">
+            Thạc sĩ
+          </span>
+            <span v-if="row.item.rankAndDegree === 'TS'">
+            Tiến sĩ
+          </span>
+            <span v-if="row.item.rankAndDegree === 'GS'">
+            Giáo sư
+          </span>
+            <span v-if="row.item.rankAndDegree === 'PGS'">
+            Phó Giáo sư
+          </span>
+          </template>
+          <template #cell(actions)="row" style="text-align: center">
+            <div class="d-flex justify-content-center flex-wrap">
+              <a
+                  v-if="userInfo && userInfo.permissions.indexOf('teacher_update') !== -1"
+                  href="javascript:void(0)"
+                  class="m-1"
+                  type="button"
+                  title="Cập nhật thông tin giảng viên"
+                  v-b-tooltip.hover
+                  @click.prevent="openModalCreateTeacherCompartment(row.item, true)">
+                <font-awesome-icon :icon="['fas', 'edit']"/>
+              </a>
+            </div>
+          </template>
         </b-table>
-        <b-row v-if="teachers.data && teachers.data.length === 0 && this.dataFilter.page === 1" class="justify-content-center">
+        <b-row v-if="teachers.data && teachers.data.length === 0 && this.dataFilter.page === 1"
+               class="justify-content-center">
           <span>Không tìm thấy bản ghi nào</span>
         </b-row>
         <b-row v-else>
@@ -147,30 +160,16 @@
     </b-card>
 
     <b-modal
-        id="create-teacher-compartment"
-        :modal-class="['ghtk-modal']"
-        :header-class="['modal__header']"
+        id="update-teacher"
+        :title="isUpdate ? 'Cập nhật thông tin giảng viên' : 'Thêm mới giảng viên'"
         :no-close-on-backdrop="true"
         size="lg"
         @hidden="closeModalCreateTeacherCompartment"
     >
-      <template slot="modal-header">
-        <div class="modal__header--item title font-weight-500">
-          Thêm giảng viên
-        </div>
-        <div class="modal__header--item close-btn px-2" @click="closeModalCreateTeacherCompartment">
-          <i class="fas fa-times"></i>
-        </div>
-      </template>
-      <div class="mb-3">
-        <b>Thêm mới giảng viên</b>
-      </div>
       <b-row>
-        <b-col md="3">
-          <label>Họ và tên<span class="text-danger">*</span>:</label>
-        </b-col>
-        <b-col md="9">
+        <b-col md="12">
           <b-form-group>
+            <label>Họ và tên<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-full-name"
                 v-model="$v.currentData.fullName.$model"
@@ -183,42 +182,33 @@
             </div>
           </b-form-group>
         </b-col>
-      </b-row>
-      <b-row>
-        <b-col md="3">
-          <label>Học hàm học vị<span class="text-danger">*</span>:</label>
-        </b-col>
-        <b-col md="9">
+        <b-col md="12">
           <b-form-group :class="{'invalid-option': validationStatus($v.currentData.rankAndDegree)}">
-            <multiselect
-                v-model="$v.currentData.rankAndDegree.$model"
-                track-by="text" label="text" :show-labels="false"
-                placeholder="Chọn" :options="optionsRankAndDegree.filter(rank => rank.value)" :searchable="true"
+            <label>Học hàm học vị<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsRankAndDegree.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
                 :class="{'is-invalid-option': validationStatus($v.currentData.rankAndDegree)}"
+                v-model.trim="currentData.rankAndDegree"
             >
-              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
-            </multiselect>
+            </b-form-select>
             <div v-if="!$v.currentData.rankAndDegree.required" class="invalid-feedback">
               Học hàm học vị không được để trống.
             </div>
           </b-form-group>
         </b-col>
-      </b-row>
-      <b-row>
-        <b-col md="3">
-          <label>Thời gian bắt đầu<span class="text-danger">*</span>:</label>
-        </b-col>
-        <b-col md="9">
+        <b-col md="12">
           <b-form-group>
+            <label>Thời gian bắt đầu<span class="text-danger">*</span>:</label>
             <div :class="{'invalid-date': validationStatus($v.currentData.startTime)}">
               <date-picker
                   class="w-100"
                   :input-class="['form-control',{'is-invalid': validationStatus($v.currentData.startTime)}]"
                   v-model.trim="$v.currentData.startTime.$model"
-                  type="datetime"
-                  format="DD/MM/YYYY HH:mm:ss"
+                  type="date"
+                  format="DD/MM/YYYY"
                   placeholder="Chọn ngày"
-                  :showSecond="true"
                   :disabled-date="(date) => date >= new Date()"
               >
               </date-picker>
@@ -228,22 +218,17 @@
             </div>
           </b-form-group>
         </b-col>
-      </b-row>
-      <b-row>
-        <b-col md="3">
-          <label>Ngày sinh<span class="text-danger">*</span>:</label>
-        </b-col>
-        <b-col md="9">
+        <b-col md="12">
           <b-form-group>
+            <label>Ngày sinh<span class="text-danger">*</span>:</label>
             <div :class="{'invalid-date': validationStatus($v.currentData.birthday)}">
               <date-picker
                   class="w-100"
                   :input-class="['form-control',{'is-invalid': validationStatus($v.currentData.birthday)}]"
                   v-model.trim="$v.currentData.birthday.$model"
-                  type="datetime"
-                  format="DD/MM/YYYY HH:mm:ss"
+                  type="date"
+                  format="DD/MM/YYYY"
                   placeholder="Chọn ngày"
-                  :showSecond="true"
                   :disabled-date="(date) => date >= new Date()"
               >
               </date-picker>
@@ -255,75 +240,75 @@
         </b-col>
       </b-row>
       <template #modal-footer>
-        <div class="w-100">
-          <b-row>
-            <b-col cols="3">
-              <b-button class="py-2 btn-light2 custom-full-btn" @click="handleResetCreateTeacherCompartment">
-                Xoá
-              </b-button>
-            </b-col>
-            <b-col cols="9">
-              <b-button variant="primary" v-if="checkPermission('teacher_create')" class="py-2 custom-full-btn" @click.prevent="handleResetCreateTeacherCompartment">
-                Đồng ý
-              </b-button>
-            </b-col>
-          </b-row>
-        </div>
+        <b-button
+            class="mr-2 btn-light2 pull-right"
+            @click="closeModalCreateTeacherCompartment"
+        >
+          Hủy
+        </b-button>
+        <b-button
+            variant="primary pull-right"
+            @click.prevent="handleCreateTeacher"
+        >
+          Đồng ý
+        </b-button>
       </template>
     </b-modal>
 
-<!--    <b-modal id="update-status-account" title="Cập nhật trạng thái" :no-close-on-backdrop="true">-->
-<!--      <p class="my-4">Bạn có chắc chắn muốn {{ this.currentItem && this.currentItem.status === 1 ? 'khóa' : 'mở khóa'}} tài khoản-->
-<!--        <span style="font-weight: 500">{{ this.currentItem && this.currentItem.accountNo }}</span> không ?</p>-->
-<!--      <template #modal-footer>-->
-<!--        <b-button-->
-<!--            class="mr-2 btn-light2 pull-right"-->
-<!--            @click="handleCancelChange"-->
-<!--        >-->
-<!--          Hủy-->
-<!--        </b-button>-->
-<!--        <b-button-->
-<!--            variant="primary pull-right"-->
-<!--            class="mr-2"-->
-<!--            @click.prevent="handleChangeStatus"-->
-<!--        >-->
-<!--          Đồng ý-->
-<!--        </b-button>-->
-<!--      </template>-->
-<!--    </b-modal>-->
+    <!--    <b-modal id="update-status-account" title="Cập nhật trạng thái" :no-close-on-backdrop="true">-->
+    <!--      <p class="my-4">Bạn có chắc chắn muốn {{ this.currentItem && this.currentItem.status === 1 ? 'khóa' : 'mở khóa'}} tài khoản-->
+    <!--        <span style="font-weight: 500">{{ this.currentItem && this.currentItem.accountNo }}</span> không ?</p>-->
+    <!--      <template #modal-footer>-->
+    <!--        <b-button-->
+    <!--            class="mr-2 btn-light2 pull-right"-->
+    <!--            @click="handleCancelChange"-->
+    <!--        >-->
+    <!--          Hủy-->
+    <!--        </b-button>-->
+    <!--        <b-button-->
+    <!--            variant="primary pull-right"-->
+    <!--            class="mr-2"-->
+    <!--            @click.prevent="handleChangeStatus"-->
+    <!--        >-->
+    <!--          Đồng ý-->
+    <!--        </b-button>-->
+    <!--      </template>-->
+    <!--    </b-modal>-->
 
-<!--    <b-toast id="export-toast" variant="success" solid :auto-hide-delay="30000">-->
-<!--      <template #toast-title>-->
-<!--        <div class="d-flex flex-grow-1 align-items-baseline">-->
-<!--          <b-img blank blank-color="#67C23A" class="mr-2" width="12" height="12"></b-img>-->
-<!--          <strong class="mr-auto">Thông báo</strong>-->
-<!--          &lt;!&ndash; <small class="text-muted mr-2">42 seconds ago</small> &ndash;&gt;-->
-<!--        </div>-->
-<!--      </template>-->
-<!--      Chúng tôi đang tạo file báo cáo, điều này có thể mất vài phút, mã file:-->
-<!--      <div>-->
-<!--        <router-link-->
-<!--            :to="{ path: '/admin/file', query: { id: file_id }}"-->
-<!--            class="waves-effect waves-classic font-weight-400"-->
-<!--            style="margin-right: 10px"-->
-<!--            target="_blank"-->
-<!--        >-->
-<!--          <i class="icon md-plus" aria-hidden="true"></i>-->
-<!--          {{ file_id }}-->
-<!--        </router-link>-->
-<!--      </div>-->
-<!--    </b-toast>-->
+    <!--    <b-toast id="export-toast" variant="success" solid :auto-hide-delay="30000">-->
+    <!--      <template #toast-title>-->
+    <!--        <div class="d-flex flex-grow-1 align-items-baseline">-->
+    <!--          <b-img blank blank-color="#67C23A" class="mr-2" width="12" height="12"></b-img>-->
+    <!--          <strong class="mr-auto">Thông báo</strong>-->
+    <!--          &lt;!&ndash; <small class="text-muted mr-2">42 seconds ago</small> &ndash;&gt;-->
+    <!--        </div>-->
+    <!--      </template>-->
+    <!--      Chúng tôi đang tạo file báo cáo, điều này có thể mất vài phút, mã file:-->
+    <!--      <div>-->
+    <!--        <router-link-->
+    <!--            :to="{ path: '/admin/file', query: { id: file_id }}"-->
+    <!--            class="waves-effect waves-classic font-weight-400"-->
+    <!--            style="margin-right: 10px"-->
+    <!--            target="_blank"-->
+    <!--        >-->
+    <!--          <i class="icon md-plus" aria-hidden="true"></i>-->
+    <!--          {{ file_id }}-->
+    <!--        </router-link>-->
+    <!--      </div>-->
+    <!--    </b-toast>-->
   </b-form>
 </template>
 <script>
 import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
 import {
+  CREATE_TEACHER,
   FETCH_TEACHERS,
+  UPDATE_TEACHER
 } from "@/store/action.type"
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
 import {checkPermission, formatDate2, formatTime} from "@/common/utils";
-import { PAGINATION_OPTIONS } from "@/common/config"
+import {PAGINATION_OPTIONS} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
 import moment from 'moment-timezone';
@@ -340,6 +325,7 @@ const initData = {
 }
 
 const initTeacher = {
+  id: null,
   fullName: null,
   rankAndDegree: null,
   startTime: null,
@@ -352,6 +338,7 @@ export default {
   mixins: [baseMixins],
   data() {
     return {
+      loadingFile: false,
       updatedAtFrom: new Date(),
       updatedAtTo: new Date(),
       totalRow: 0,
@@ -360,8 +347,10 @@ export default {
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
       heading: "Danh sách giảng viên",
       loadingHeader: true,
-      dataFilter: Object.assign({}, initData),
-      selectedPageSize: { text: initData.pageSize },
+      dataFilter: Object.assign({}, {
+        ...initData,
+      }),
+      selectedPageSize: {text: initData.pageSize},
       selectedRankAndDegree: {value: null, text: 'Tất cả'},
       optionsRankAndDegree: [
         {value: null, text: 'Tất cả'},
@@ -372,10 +361,24 @@ export default {
         {value: 'PGS', text: 'Phó giáo sư'},
       ],
       fields: [
-        { key: "key", label: "STT", tdClass: 'align-middle', thClass: 'align-middle', visible: true, thStyle: { width: '3%' } },
-        { key: "id", label: "ID", tdClass: 'align-middle', thClass: 'align-middle', visible: true, thStyle: { width: '3%' } },
-        { key: "fullName", label: "Họ và tên", visible: true, thStyle: { width: '7%' }, thClass: 'align-middle' },
-        { key: "rankAndDegree", label: "Học hàm học vị", visible: true, thStyle: "width: 7%", thClass: 'align-middle' },
+        {
+          key: "key",
+          label: "STT",
+          tdClass: 'align-middle',
+          thClass: 'align-middle',
+          visible: true,
+          thStyle: {width: '3%'}
+        },
+        {
+          key: "id",
+          label: "ID",
+          tdClass: 'align-middle',
+          thClass: 'align-middle',
+          visible: true,
+          thStyle: {width: '3%'}
+        },
+        {key: "fullName", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
+        {key: "rankAndDegree", label: "Học hàm học vị", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "startTime",
           label: "Thời gian bắt đầu",
@@ -417,18 +420,20 @@ export default {
         inputClass: "form-control",
       },
       requestTimeFilter: null,
-      currentItem: {},
       actionType: null,
       userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null,
       currentData: Object.assign({}, {...initTeacher}),
+      currentDetail: null,
+      currentFile: null,
+      isUpdate: false,
     }
   },
   validations: {
     currentData: {
-      fullName: { required },
-      rankAndDegree: { required },
-      startTime: { required },
-      birthday: { required },
+      fullName: {required},
+      rankAndDegree: {required},
+      startTime: {required},
+      birthday: {required},
     },
   },
   mounted() {
@@ -447,8 +452,7 @@ export default {
 
     this.fetchTeachers();
   },
-  watch: {
-  },
+  watch: {},
   computed: {
     ...mapGetters(["teachers"]),
     visibleFields() {
@@ -487,7 +491,7 @@ export default {
     },
     changePage(e) {
       this.dataFilter.page = e
-      router.push({ path: '/admin/teachers', query: { dataSearch: JSON.stringify(this.dataFilter) }})
+      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
       this.fetchTeachers();
     },
     changePageSize(e) {
@@ -495,20 +499,22 @@ export default {
         this.dataFilter.pageSize = e.text
         this.dataFilter.page = 1
       }
-      router.push({ path: '/admin/teachers', query: { dataSearch: JSON.stringify(this.dataFilter) }})
+      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
       this.fetchTeachers();
     },
     handleSearch(event) {
       event.preventDefault();
       this.handleDataFilter();
-      router.push({ path: '/admin/teachers', query: { dataSearch: JSON.stringify(this.dataFilter) }})
+      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
       this.fetchTeachers();
     },
     handleReset() {
       this.$router.replace('/admin/teachers')
       this.dataFilter = Object.assign({}, {
         ...initData,
-        pageSize: this.dataFilter.pageSize
+        pageSize: this.dataFilter.pageSize,
+        startTimeFrom: new Date(),
+        startTimeTo: new Date(),
       });
       this.startTimeFrom = new Date();
       this.startTimeTo = new Date();
@@ -518,34 +524,88 @@ export default {
       this.handleDataFilter();
       this.fetchTeachers();
     },
-    uploadFileTeachers() {
-      this.$router.replace('/admin/teachers')
-      this.dataFilter = Object.assign({}, {
-        ...initData,
-        pageSize: this.dataFilter.pageSize
-      });
-      this.startTimeFrom = new Date();
-      this.startTimeTo = new Date();
-      this.fullName = '';
-      this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
-      this.id = '';
-      this.handleDataFilter();
-      this.fetchTeachers();
-    },
-    openModalCreateTeacherCompartment() {
-      this.$root.$emit("bv::show::modal", 'create-teacher-compartment');
-      this.currentData = Object.assign({}, {...initTeacher})
+    openModalCreateTeacherCompartment(teacher, isUpdate) {
+      this.isUpdate = isUpdate
+
+      if (isUpdate) {
+        console.log(teacher);
+        this.currentData = Object.assign({}, {
+          ...teacher,
+          startTime: new Date(teacher.startTime),
+          birthday: new Date(teacher.birthday),
+        });
+      } else {
+        this.currentData = Object.assign({}, {
+          ...initTeacher,
+          rankAndDegree: 'GV',
+          startTime: new Date(),
+          birthday: new Date(),
+        });
+      }
+      this.$root.$emit("bv::show::modal", 'update-teacher');
     },
     closeModalCreateTeacherCompartment() {
-      this.handleResetCreateTeacherCompartment()
-      this.$root.$emit("bv::hide::modal", 'create-teacher-compartment')
-    },
-    handleResetCreateTeacherCompartment() {
-      this.$v.$reset()
       this.currentData = Object.assign({}, {...initTeacher})
+      this.$nextTick(() => {
+        this.$v.currentData.$reset();
+      });
+      this.$root.$emit("bv::hide::modal", 'update-teacher')
     },
     validationStatus: function (validation) {
       return typeof validation != "undefined" ? validation.$error : false;
+    },
+    async handleCreateTeacher() {
+      this.$v.$reset();
+      this.$v.$touch();
+
+      console.log(this.currentData);
+
+      if (this.$v.currentData.$invalid) return
+      const payload = {
+        id: this.isUpdate ? this.currentData.id : null,
+        fullName: this.currentData.fullName,
+        rankAndDegree: this.currentData.rankAndDegree.value,
+        startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      }
+
+      if (this.isUpdate) {
+        const res = await this.$store.dispatch(UPDATE_TEACHER, payload)
+        if (res && res.status === 200) {
+          clearTimeout(this.handleDelay)
+          this.handleDelay = setTimeout(() => {
+            this.$message({
+              message: 'Cập nhật thông tin giảng viên thành công',
+              type: "success",
+              showClose: true,
+            });
+            this.closeModalCreateTeacherCompartment()
+            this.fetchTeachers()
+          }, 1000)
+        }
+      } else {
+        const res = await this.$store.dispatch(CREATE_TEACHER, payload)
+        if (res && res.status === 200) {
+          clearTimeout(this.handleDelay)
+          this.handleDelay = setTimeout(() => {
+            this.$message({
+              message: 'Thêm mới giảng viên thành công',
+              type: "success",
+              showClose: true,
+            });
+            this.closeModalCreateTeacherCompartment()
+            this.fetchTeachers()
+          }, 1000)
+        }
+      }
+    },
+    openModalUploadTeacher() {
+      this.$root.$emit("bv::show::modal", 'modal-upload-teacher')
+    },
+    closeModalUpload() {
+      this.currentDetail = null
+      this.currentFile = null
+      this.$root.$emit("bv::hide::modal", 'modal-upload-teacher')
     },
   }
 }
@@ -557,6 +617,7 @@ export default {
   color: #838790 !important;
   opacity: 0.5;
 }
+
 .error {
   color: #dc3545;
   font-size: 13px;
