@@ -1,6 +1,5 @@
 const state = {
   eventData: {
-    gchat_token: null,
     refresh_token: null
   }
 }
@@ -15,7 +14,6 @@ const mutations = {
   ADD_EVENT(state, dataEvent) {
     if (!dataEvent) return
     if (dataEvent.type === 'authentication' && dataEvent.payload) {
-      state.eventData.gchat_token = dataEvent.payload.token || null
       state.eventData.refresh_token = dataEvent.payload.refresh_token || null
     }
   }
