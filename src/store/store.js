@@ -9,6 +9,7 @@ import file from "./file.module"
 import event from "./event.module"
 import teacher from "./teacher.module"
 import groupTeacher from "./groupteacher.module"
+import classes from "./class.module"
 
 Vue.use(Vuex);
 
@@ -21,6 +22,7 @@ export default new Vuex.Store({
     accounts,
     teacher,
     groupTeacher,
+    classes,
     file,
     event,
   }

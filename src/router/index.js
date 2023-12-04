@@ -53,6 +53,12 @@ const router = new Router({
       component: () => import("@/views/GroupTeachers"),
       meta: { title: 'Quản lý nhóm chuyên môn', layout: 'default' }
     },
+    {
+      path: '/admin/classes',
+      name: 'Classes',
+      component: () => import("@/views/Classes"),
+      meta: { title: 'Quản lý lớp học', layout: 'default' }
+    },
   ]
 });
 router.beforeEach((to, from, next) => {
