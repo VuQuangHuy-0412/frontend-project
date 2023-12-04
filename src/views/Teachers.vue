@@ -400,6 +400,13 @@ const initTeacher = {
   birthday: null,
 }
 
+const initNewDataExcel = {
+  fullName: null,
+  rankAndDegree: null,
+  startTime: null,
+  birthday: null,
+};
+
 export default {
   name: "Teachers",
   components: {PageTitle, DatePicker},
@@ -751,35 +758,21 @@ export default {
 
       this.dataExcel.forEach(item => {
         let newData = Object.assign({}, {...initNewDataExcel})
-        newData.ref = item.ref ? item.ref : null;
-        newData.bank = item.bank ? item.bank : null;
-        newData.bankAccount = item.bankAccount ? item.bankAccount : null;
-        newData.createdUsername = this.userInfo.username
-            ? this.userInfo.username.trim('')
-            : null
-        newData.stationName = item.stationName ? item.stationName : null;
-        newData.packageOrder = item.packageOrder ? item.packageOrder : null;
-        newData.statementTime = item.statementTime ? item.statementTime : null
-        newData.money = item.money ? formatCurrencyToString(item.money) : null
-        newData.packageAmount = item.packageAmount ? formatCurrencyToString(item.packageAmount) : null
+        newData.fullName = item.fullName ? item.fullName : null;
+        newData.rankAndDegree = item.rankAndDegree ? item.rankAndDegree : null;
+        newData.startTime = item.startTime ? item.startTime : null
+        newData.birthday = item.birthday ? item.birthday : null
 
         this.uploadDataExcel.push({...newData})
       });
 
       this.loadingFile = true;
       const dataFiltered = this.uploadDataExcel.filter((item) => {
-        return item.ref !== null
-            || item.packageOrder !== null
-            || item.bankAccount !== null
-            || item.bank !== null
-            || item.stationName !== null
-            || item.packageAmount !== null
-            || item.money !== null
-            || item.statementTime !== null
+        return item.fullName !== null;
       });
 
-      let res = await this.post('/admin/statement/payment-transfer/excel', {
-        paymentTransferCreateRequests: dataFiltered
+      let res = await this.post('/teacher/upload-excel', {
+        teacherCreateRequests: dataFiltered
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -801,7 +794,7 @@ export default {
 
         setTimeout(() => {
           this.closeModalUpload();
-          this.fetchPaymentTransfer();
+          this.fetchTeachers();
         }, 1000);
       }
     },
@@ -820,6 +813,28 @@ export default {
   color: #dc3545;
   font-size: 13px;
 }
+</style>
+<style>
+.custom-file-label {
+  height: 120px;
+  border: 1px dashed #01904a;
+  justify-content: center;
+  display: flex;
+  align-items: end;
+  padding: 20px;
+}
+.custom-file-label::after {
+  content: 'Chọn file' !important;
+  position: relative !important;
+  background: none;
+  border: none;
+  padding: 0;
+  height: unset;
+  margin-left: 5px;
+  color: #01904a;
+  font-weight: bold;
+  font-size: 15px;
+}
 
 #modal-upload-teacher .modal-footer {
   display: none;
@@ -832,5 +847,10 @@ export default {
   z-index: 1000;
   top: 120px;
   left: 46%;
+}
+
+.custom-file-label {
+  font-weight: bold;
+  font-size: 15px;
 }
 </style>
