@@ -255,6 +255,73 @@
       </template>
     </b-modal>
 
+    <b-modal
+        id="modal-upload-teacher"
+        :modal-class="['ghtk-modal']"
+        :header-class="['modal__header']"
+        :no-close-on-backdrop="true"
+        size="lg"
+        @hidden="closeModalUpload"
+    >
+      <template slot="modal-header">
+        <div class="modal__header--item title font-weight-500">
+          Upload file ds giảng viên
+        </div>
+        <div class="modal__header--item close-btn px-2" @click="closeModalUpload">
+          <i class="fas fa-times"></i>
+        </div>
+      </template>
+      <b-row>
+        <b-col md="2">
+          <div style="font-weight: bold">File mẫu</div>
+        </b-col>
+        <b-col md="6">
+          <a
+              :href="SAMPLE_TEACHER_IMPORT_LINK"
+              target="_self"
+              style="font-weight: bold;color:black!important;"
+          >Format_ThemGV</a
+          >
+        </b-col>
+      </b-row>
+      <b-row class="mt-3">
+        <b-col md="2">
+          <div style="font-weight: bold">File đã upload</div>
+        </b-col>
+        <b-col md="6">
+          <div style="font-weight: bold; color:black!important;" v-if="currentFile">
+            {{ currentFile.name }} <i @click="handleResetFile" class="fas fa-times"
+                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: gray"></i>
+          </div>
+        </b-col>
+      </b-row>
+      <div class="py-2">
+        <b-form-group v-if="userInfo" class="mt-2">
+          <i class="fas fa-upload custom-upload"></i>
+          <div class="mr-4">
+            <b-form-file
+                id="input-file"
+                ref="fileExcel"
+                multiple
+                type="file"
+                accept=".xls, .xlsx"
+                placeholder="Kéo thả file hoặc"
+                browse-text="Chọn file"
+                @change="handleFilesUpload"
+            ></b-form-file>
+          </div>
+        </b-form-group>
+        <div style="width: 100%; text-align: center">
+          <b-button :disabled="!currentFile || loadingFile" variant="primary" class="py-2"
+                    style="margin-top: 90px;z-index: 1000;width: 200px" @click.prevent="handleUploadDataExcel">
+            <span v-if="!loadingFile"
+            > Xác nhận</span>
+            <i v-if="loadingFile" class="fa fa-spinner fa-spin mr-2"/>
+          </b-button>
+        </div>
+      </div>
+    </b-modal>
+
     <!--    <b-modal id="update-status-account" title="Cập nhật trạng thái" :no-close-on-backdrop="true">-->
     <!--      <p class="my-4">Bạn có chắc chắn muốn {{ this.currentItem && this.currentItem.status === 1 ? 'khóa' : 'mở khóa'}} tài khoản-->
     <!--        <span style="font-weight: 500">{{ this.currentItem && this.currentItem.accountNo }}</span> không ?</p>-->
@@ -307,12 +374,13 @@ import {
   UPDATE_TEACHER
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatDate2, formatTime} from "@/common/utils";
-import {PAGINATION_OPTIONS} from "@/common/config"
+import {checkPermission, formatCurrencyToString, formatDate2, formatTime} from "@/common/utils";
+import {PAGINATION_OPTIONS, SAMPLE_TEACHER_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
 import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
+import * as XLSX from "xlsx";
 
 const initData = {
   id: null,
@@ -343,6 +411,7 @@ export default {
       updatedAtTo: new Date(),
       totalRow: 0,
       PAGINATION_OPTIONS,
+      SAMPLE_TEACHER_IMPORT_LINK,
       subheading: "Quản lý danh sách giảng viên.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
       heading: "Danh sách giảng viên",
@@ -426,6 +495,8 @@ export default {
       currentDetail: null,
       currentFile: null,
       isUpdate: false,
+      uploadDataExcel: [],
+      dataExcel: [],
     }
   },
   validations: {
@@ -557,14 +628,13 @@ export default {
     async handleCreateTeacher() {
       this.$v.$reset();
       this.$v.$touch();
-
       console.log(this.currentData);
 
       if (this.$v.currentData.$invalid) return
       const payload = {
         id: this.isUpdate ? this.currentData.id : null,
         fullName: this.currentData.fullName,
-        rankAndDegree: this.currentData.rankAndDegree.value,
+        rankAndDegree: this.currentData.rankAndDegree,
         startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       }
@@ -607,6 +677,134 @@ export default {
       this.currentFile = null
       this.$root.$emit("bv::hide::modal", 'modal-upload-teacher')
     },
+    handleResetFile() {
+      this.uploadDataExcel = []
+      this.dataExcel = []
+      this.currentFile = null
+      this.$nextTick(() => {
+        this.$refs.fileExcel.reset();
+      })
+    },
+    handleFilesUpload(event) {
+      this.dataExcel = [];
+      this.uploadDataExcel = [];
+      this.currentFile = null;
+      let uploadedFiles = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
+      if (!uploadedFiles) return;
+
+      this.currentFile = uploadedFiles;
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        const target = reader.result;
+        const wb = XLSX.read(target, {type: "array", cellDates: true});
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false});
+        this.handleFormatJSONFromExcel(data);
+      };
+      reader.readAsArrayBuffer(uploadedFiles);
+    },
+    handleFormatJSONFromExcel(json) {
+      if (!json || json.length <= 1) return;
+
+      this.dataExcel = json
+          .filter((item, index) => index !== 0)
+          .map((item, index) => {
+            let teacher = Object.assign({});
+
+            item.forEach((itemValue, indexValue) => {
+              if (json[0][indexValue]) {
+                let newAttribute = '';
+                switch (json[0][indexValue]) {
+                  case 'Họ và tên':
+                    newAttribute = 'fullName';
+                    break;
+                  case 'Học hàm học vị':
+                    newAttribute = 'rankAndDegree';
+                    break;
+                  case 'Ngày bắt đầu':
+                    newAttribute = 'startTime';
+                    break;
+                  case 'Ngày sinh':
+                    newAttribute = 'birthday';
+                    break;
+                  default:
+                    break;
+                }
+                teacher[newAttribute] = itemValue;
+              }
+            });
+
+            return teacher;
+          });
+    },
+    async handleUploadDataExcel() {
+      if (!this.dataExcel || this.dataExcel.length === 0) {
+        this.$message({
+          message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
+          type: "warning",
+          showClose: true,
+        });
+        return
+      }
+      if (!this.dataExcel || this.dataExcel.length === 0) return null
+
+      this.dataExcel.forEach(item => {
+        let newData = Object.assign({}, {...initNewDataExcel})
+        newData.ref = item.ref ? item.ref : null;
+        newData.bank = item.bank ? item.bank : null;
+        newData.bankAccount = item.bankAccount ? item.bankAccount : null;
+        newData.createdUsername = this.userInfo.username
+            ? this.userInfo.username.trim('')
+            : null
+        newData.stationName = item.stationName ? item.stationName : null;
+        newData.packageOrder = item.packageOrder ? item.packageOrder : null;
+        newData.statementTime = item.statementTime ? item.statementTime : null
+        newData.money = item.money ? formatCurrencyToString(item.money) : null
+        newData.packageAmount = item.packageAmount ? formatCurrencyToString(item.packageAmount) : null
+
+        this.uploadDataExcel.push({...newData})
+      });
+
+      this.loadingFile = true;
+      const dataFiltered = this.uploadDataExcel.filter((item) => {
+        return item.ref !== null
+            || item.packageOrder !== null
+            || item.bankAccount !== null
+            || item.bank !== null
+            || item.stationName !== null
+            || item.packageAmount !== null
+            || item.money !== null
+            || item.statementTime !== null
+      });
+
+      let res = await this.post('/admin/statement/payment-transfer/excel', {
+        paymentTransferCreateRequests: dataFiltered
+      });
+      setTimeout(() => {
+        this.loadingFile = false;
+      }, 300);
+
+      if (res.status === 200) {
+        this.$message({
+          message: 'Tải dữ liệu lên thành công.',
+          type: "success",
+          showClose: true,
+        });
+
+        this.uploadDataExcel = []
+        this.dataExcel = []
+        this.currentFile = null
+        this.$nextTick(() => {
+          this.$refs.fileExcel.reset();
+        })
+
+        setTimeout(() => {
+          this.closeModalUpload();
+          this.fetchPaymentTransfer();
+        }, 1000);
+      }
+    },
   }
 }
 </script>
@@ -621,5 +819,18 @@ export default {
 .error {
   color: #dc3545;
   font-size: 13px;
+}
+
+#modal-upload-teacher .modal-footer {
+  display: none;
+}
+
+.custom-upload {
+  font-size: 35px;
+  color: #01904a;
+  position: absolute;
+  z-index: 1000;
+  top: 120px;
+  left: 46%;
 }
 </style>

@@ -34,11 +34,5 @@ export const PAGINATION_OPTIONS = [
   { text: 50 },
   { text: 100 }
 ];
+export const SAMPLE_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
 
-export const LOGO_TELECOM_PROVIDER = {
-  VIETTEL: 'https://cache.giaohangtietkiem.vn/d/5e0127abcf65444f84c35b4a82e21312.png',
-  MOBIFONE: 'https://cache.giaohangtietkiem.vn/d/5671996293fa4813bdaf7f13e249b6c8.png',
-  VINAPHONE: 'https://cache.giaohangtietkiem.vn/d/3a3cce8929e7409aa758977f37a47ab9.png',
-  GMOBILE: 'https://cache.giaohangtietkiem.vn/d/0c246d7d142e492e80fddd11c9304d95.jpg?width=450&height=280',
-  VNMOBILE: 'https://cache.giaohangtietkiem.vn/d/53f9c6bf1f764772b7b1e6118d12ea44.png',
-}
