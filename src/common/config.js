@@ -37,4 +37,5 @@ export const PAGINATION_OPTIONS = [
 export const SAMPLE_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
 export const SAMPLE_GROUP_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
 export const SAMPLE_CLASS_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
+export const SAMPLE_STUDENT_PROJECT_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
 

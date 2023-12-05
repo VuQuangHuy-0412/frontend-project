@@ -59,6 +59,12 @@ const router = new Router({
       component: () => import("@/views/Classes"),
       meta: { title: 'Quản lý lớp học', layout: 'default' }
     },
+    {
+      path: '/admin/student-projects',
+      name: 'StudentProjects',
+      component: () => import("@/views/StudentProjects"),
+      meta: { title: 'Quản lý sinh viên đăng ký đồ án', layout: 'default' }
+    },
   ]
 });
 router.beforeEach((to, from, next) => {
