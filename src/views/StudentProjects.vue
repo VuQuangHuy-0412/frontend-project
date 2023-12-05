@@ -46,7 +46,7 @@
               Xóa lọc
             </b-button>
           </b-col>
-          <b-col md="8" class="text-right mt-30">
+          <b-col md="12" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('student_project_create')"
                 variant="primary"
@@ -62,7 +62,7 @@
 
         <b-table
             class="mt-3"
-            :items="studentprojects.data"
+            :items="studentProjects.data"
             :fields="visibleFields"
             :bordered="true"
             :hover="true"
@@ -93,7 +93,7 @@
             </div>
           </template>
         </b-table>
-        <b-row v-if="studentprojects.data && studentprojects.data.length === 0 && this.dataFilter.page === 1"
+        <b-row v-if="studentProjects.data && studentProjects.data.length === 0 && this.dataFilter.page === 1"
                class="justify-content-center">
           <span>Không tìm thấy bản ghi nào</span>
         </b-row>

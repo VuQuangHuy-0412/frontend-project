@@ -28,6 +28,13 @@
             </multiselect>
           </b-col>
           <b-col md="2">
+            <div class="label-form">Nhóm chuyên môn</div>
+            <multiselect v-model="selectedGroupTeacher" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsGroupTeacher" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+          <b-col md="2">
             <div class="label-form">Thời gian bắt đầu từ</div>
             <date-picker
                 :disabled-date="(date) => date >= new Date()"
@@ -321,54 +328,13 @@
         </div>
       </div>
     </b-modal>
-
-    <!--    <b-modal id="update-status-account" title="Cập nhật trạng thái" :no-close-on-backdrop="true">-->
-    <!--      <p class="my-4">Bạn có chắc chắn muốn {{ this.currentItem && this.currentItem.status === 1 ? 'khóa' : 'mở khóa'}} tài khoản-->
-    <!--        <span style="font-weight: 500">{{ this.currentItem && this.currentItem.accountNo }}</span> không ?</p>-->
-    <!--      <template #modal-footer>-->
-    <!--        <b-button-->
-    <!--            class="mr-2 btn-light2 pull-right"-->
-    <!--            @click="handleCancelChange"-->
-    <!--        >-->
-    <!--          Hủy-->
-    <!--        </b-button>-->
-    <!--        <b-button-->
-    <!--            variant="primary pull-right"-->
-    <!--            class="mr-2"-->
-    <!--            @click.prevent="handleChangeStatus"-->
-    <!--        >-->
-    <!--          Đồng ý-->
-    <!--        </b-button>-->
-    <!--      </template>-->
-    <!--    </b-modal>-->
-
-    <!--    <b-toast id="export-toast" variant="success" solid :auto-hide-delay="30000">-->
-    <!--      <template #toast-title>-->
-    <!--        <div class="d-flex flex-grow-1 align-items-baseline">-->
-    <!--          <b-img blank blank-color="#67C23A" class="mr-2" width="12" height="12"></b-img>-->
-    <!--          <strong class="mr-auto">Thông báo</strong>-->
-    <!--          &lt;!&ndash; <small class="text-muted mr-2">42 seconds ago</small> &ndash;&gt;-->
-    <!--        </div>-->
-    <!--      </template>-->
-    <!--      Chúng tôi đang tạo file báo cáo, điều này có thể mất vài phút, mã file:-->
-    <!--      <div>-->
-    <!--        <router-link-->
-    <!--            :to="{ path: '/admin/file', query: { id: file_id }}"-->
-    <!--            class="waves-effect waves-classic font-weight-400"-->
-    <!--            style="margin-right: 10px"-->
-    <!--            target="_blank"-->
-    <!--        >-->
-    <!--          <i class="icon md-plus" aria-hidden="true"></i>-->
-    <!--          {{ file_id }}-->
-    <!--        </router-link>-->
-    <!--      </div>-->
-    <!--    </b-toast>-->
   </b-form>
 </template>
 <script>
 import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
 import {
+  ALL_GROUP_TEACHER,
   CREATE_TEACHER,
   FETCH_TEACHERS,
   UPDATE_TEACHER
@@ -381,11 +347,13 @@ import router from '@/router';
 import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
+import {SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
 
 const initData = {
   id: null,
   fullName: null,
   rankAndDegree: null,
+  groupTeacher: null,
   startTimeFrom: null,
   startTimeTo: null,
   page: 1,
@@ -414,8 +382,8 @@ export default {
   data() {
     return {
       loadingFile: false,
-      updatedAtFrom: new Date(),
-      updatedAtTo: new Date(),
+      startTimeFrom: new Date(),
+      startTimeTo: new Date(),
       totalRow: 0,
       PAGINATION_OPTIONS,
       SAMPLE_TEACHER_IMPORT_LINK,
@@ -504,6 +472,7 @@ export default {
       isUpdate: false,
       uploadDataExcel: [],
       dataExcel: [],
+      selectedGroupTeacher: { value: null, text: "Tất cả" },
     }
   },
   validations: {
@@ -515,37 +484,48 @@ export default {
     },
   },
   mounted() {
-    this.handleDataFilter();
-    const dataSearch = this.$route.query.dataSearch;
+    Promise.all([
+        this.fetchAllGroupTeachers()
+    ]).then(() => {
+      const dataSearch = this.$route.query.dataSearch;
 
-    if (dataSearch) {
-      this.dataFilter = JSON.parse(String(dataSearch));
+      if (dataSearch) {
+        this.dataFilter = JSON.parse(String(dataSearch));
 
-      this.selectedRankAndDegree = this.optionsRankAndDegree.filter((i) => i.value === this.dataFilter.rankAndDegree)[0];
-      this.startTimeFrom = this.dataFilter.startTimeFrom && new Date(this.dataFilter.startTimeFrom);
-      this.startTimeTo = this.dataFilter.startTimeTo && new Date(moment(this.dataFilter.startTimeTo).subtract(1, 'day'));
+        this.selectedRankAndDegree = this.optionsRankAndDegree.filter((i) => i.value === this.dataFilter.rankAndDegree)[0];
+        this.selectedGroupTeacher = this.optionsGroupTeacher.filter(
+            (i) => i.value === this.dataFilter.groupTeacher
+        )[0];
+        this.startTimeFrom = this.dataFilter.startTimeFrom && new Date(this.dataFilter.startTimeFrom);
+        this.startTimeTo = this.dataFilter.startTimeTo && new Date(moment(this.dataFilter.startTimeTo).subtract(1, 'day'));
 
-      this.selectedPageSize = {text: this.dataFilter.pageSize}
-    }
+        this.selectedPageSize = {text: this.dataFilter.pageSize}
+      }
+      this.handleDataFilter();
 
-    this.fetchTeachers();
+      this.fetchTeachers();
+    })
   },
   watch: {},
   computed: {
-    ...mapGetters(["teachers"]),
+    ...mapGetters(["teachers", "allGroupTeachers"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
     },
     validation() {
     },
+    optionsGroupTeacher() {
+      return this.formatOptionsGroupTeacher(this.allGroupTeachers);
+    }
   },
   methods: {
     handleDataFilter() {
       this.dataFilter.startTimeFrom = this.startTimeFrom && formatTime(this.startTimeFrom, 'START');
       this.dataFilter.startTimeTo = this.startTimeTo && formatTime(this.startTimeTo, 'END');
-      this.dataFilter.id = this.id ? this.id.value : null;
-      this.dataFilter.fullName = this.fullName ? this.fullName.value : null;
+      this.dataFilter.id = this.id !== '' ? this.dataFilter.id : null;
+      this.dataFilter.fullName = this.fullName !== '' ? this.dataFilter.fullName : null;
       this.dataFilter.rankAndDegree = this.selectedRankAndDegree === null ? null : this.selectedRankAndDegree.value;
+      this.dataFilter.groupTeacher = this.selectedGroupTeacher === null ? null : this.selectedGroupTeacher.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
@@ -598,6 +578,7 @@ export default {
       this.startTimeTo = new Date();
       this.fullName = '';
       this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
+      this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
       this.id = '';
       this.handleDataFilter();
       this.fetchTeachers();
@@ -796,6 +777,29 @@ export default {
           this.closeModalUpload();
           this.fetchTeachers();
         }, 1000);
+      }
+    },
+    formatOptionsGroupTeacher(groupTeachers) {
+      if (!groupTeachers) return []
+      let options = groupTeachers.map(item => {
+        return {text: item.name, value: item.id}
+      })
+
+      let result = [{text: "Tất cả", value: null}]
+      result.push({...options[0]})
+      options.forEach(item => {
+        if (result && result.length > 0) {
+          if (result.map(child => child.value).indexOf(item.value) === -1) result.push(item)
+        }
+      })
+
+      return result;
+    },
+    async fetchAllGroupTeachers() {
+      let response = await this.$store.dispatch(ALL_GROUP_TEACHER);
+
+      if (response && response.data) {
+        this.$store.commit(SET_ALL_GROUP_TEACHERS, response.data);
       }
     },
   }

@@ -51,7 +51,7 @@
               Xóa lọc
             </b-button>
           </b-col>
-          <b-col md="8" class="text-right mt-30">
+          <b-col md="2" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('subject_create')"
                 variant="primary"
@@ -395,7 +395,7 @@ export default {
       this.dataFilter.id = this.id ? this.id.value : null;
       this.dataFilter.name = this.name ? this.name.value : null;
       this.dataFilter.code = this.code ? this.code.value : null;
-      this.dataFilter.groupId = this.groupId === null ? null : this.groupId.value;
+      this.dataFilter.groupId = this.groupId ? this.groupId.value : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },

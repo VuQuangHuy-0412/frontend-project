@@ -511,6 +511,7 @@ export default {
       code: {required},
       semester: {required},
       subjectId: {required},
+      teacherId: {required},
       week: {required},
       dayOfWeek: {required},
       timeOfDay: {required},
