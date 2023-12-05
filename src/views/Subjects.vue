@@ -17,23 +17,28 @@
             <b-input type="text" placeholder="Nhập ID" v-model.trim="dataFilter.id"/>
           </b-col>
           <b-col md="2">
-            <div class="label-form">Họ và tên</div>
-            <b-input type="text" placeholder="Nhập họ và tên" v-model.trim="dataFilter.name"/>
+            <div class="label-form">Tên học phần</div>
+            <b-input type="text" placeholder="Nhập tên học phần" v-model.trim="dataFilter.name"/>
           </b-col>
           <b-col md="2">
-            <div class="label-form">Mã sinh viên</div>
-            <b-input type="text" placeholder="Nhập mã sinh viên" v-model.trim="dataFilter.studentCode"/>
+            <div class="label-form">Mã học phần</div>
+            <b-input type="text" placeholder="Nhập mã học phần" v-model.trim="dataFilter.code"/>
           </b-col>
-          <b-col md="2">
-            <div class="label-form">Mã lớp</div>
-            <b-input type="text" placeholder="Nhập mã lớp" v-model.trim="dataFilter.classId"/>
-          </b-col>
+
+<!--          <b-col md="2">-->
+<!--            <div class="label-form">Học hàm học vị</div>-->
+<!--            <multiselect v-model="selectedRankAndDegree" track-by="text" label="text" :show-labels="false"-->
+<!--                         placeholder="Chọn" :options="optionsRankAndDegree" :searchable="true">-->
+<!--              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>-->
+<!--            </multiselect>-->
+<!--          </b-col>-->
+
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
             </b-button>
-            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadStudentProject"
+            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadSubject"
                       style="border: none">
               <font-awesome-icon :icon="['fas','file-excel']"/>
               <span v-if="!loadingFile"
@@ -48,21 +53,21 @@
           </b-col>
           <b-col md="8" class="text-right mt-30">
             <b-button
-                v-if="checkPermission('student_project_create')"
+                v-if="checkPermission('subject_create')"
                 variant="primary"
                 class="custom-btn-add-common"
                 style="background: orange; border: none"
-                @click="openModalCreateStudentProjectCompartment(null, false)"
+                @click="openModalCreateSubjectCompartment(null, false)"
             >
               <font-awesome-icon :icon="['fas','plus']"/>
-              Thêm sinh viên
+              Thêm học phần
             </b-button>
           </b-col>
         </b-row>
 
         <b-table
             class="mt-3"
-            :items="studentprojects.data"
+            :items="subjects.data"
             :fields="visibleFields"
             :bordered="true"
             :hover="true"
@@ -81,19 +86,19 @@
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
-                  v-if="userInfo && userInfo.permissions.indexOf('student_project_update') !== -1"
+                  v-if="userInfo && userInfo.permissions.indexOf('subject_update') !== -1"
                   href="javascript:void(0)"
                   class="m-1"
                   type="button"
-                  title="Cập nhật thông tin sinh viên"
+                  title="Cập nhật thông tin học phần"
                   v-b-tooltip.hover
-                  @click.prevent="openModalCreateStudentProjectCompartment(row.item, true)">
+                  @click.prevent="openModalCreateSubjectCompartment(row.item, true)">
                 <font-awesome-icon :icon="['fas', 'edit']"/>
               </a>
             </div>
           </template>
         </b-table>
-        <b-row v-if="studentprojects.data && studentprojects.data.length === 0 && this.dataFilter.page === 1"
+        <b-row v-if="subjects.data && subjects.data.length === 0 && this.dataFilter.page === 1"
                class="justify-content-center">
           <span>Không tìm thấy bản ghi nào</span>
         </b-row>
@@ -120,116 +125,69 @@
     </b-card>
 
     <b-modal
-        id="update-student-project"
-        :title="isUpdate ? 'Cập nhật thông tin sinh viên' : 'Thêm mới sinh viên'"
+        id="update-subject"
+        :title="isUpdate ? 'Cập nhật thông tin học phần' : 'Thêm mới học phần'"
         :no-close-on-backdrop="true"
         size="lg"
-        @hidden="closeModalCreateStudentProjectCompartment"
+        @hidden="closeModalCreateSubjectCompartment"
     >
       <b-row>
         <b-col md="12">
           <b-form-group>
-            <label>Họ và tên<span class="text-danger">*</span>:</label>
+            <label>Tên học phần<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-name"
                 v-model="$v.currentData.name.$model"
-                placeholder="Nhập họ và tên"
+                placeholder="Nhập tên học phần"
                 trim
                 :class="{ 'is-invalid': validationStatus($v.currentData.name) }"
             />
             <div v-if="!$v.currentData.name.required" class="invalid-feedback">
-              Họ và tên không được để trống.
+              Tên học phần không được để trống.
             </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Mã sinh viên<span class="text-danger">*</span>:</label>
+            <label>Mã học phần<span class="text-danger">*</span>:</label>
             <b-form-input
-                id="input-student-code"
-                v-model="$v.currentData.studentCode.$model"
-                placeholder="Nhập mã sinh viên"
+                id="input-name"
+                v-model="$v.currentData.code.$model"
+                placeholder="Nhập mã học phần"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.studentCode) }"
+                :class="{ 'is-invalid': validationStatus($v.currentData.code) }"
             />
-            <div v-if="!$v.currentData.studentCode.required" class="invalid-feedback">
-              Mã sinh viên không được để trống.
+            <div v-if="!$v.currentData.code.required" class="invalid-feedback">
+              Mã học phần không được để trống.
             </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Lớp học<span class="text-danger">*</span>:</label>
+            <label>Nhóm chuyên môn<span class="text-danger">*</span>:</label>
             <b-form-input
-                id="input-class-id"
-                v-model="$v.currentData.classId.$model"
-                placeholder="Nhập mã lớp học"
+                id="input-name"
+                v-model="$v.currentData.groupId.$model"
+                placeholder="Nhập nhóm chuyên môn"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.classId) }"
+                :class="{ 'is-invalid': validationStatus($v.currentData.groupId) }"
             />
-            <div v-if="!$v.currentData.classId.required" class="invalid-feedback">
-              Mã lớp học không được để trống.
+            <div v-if="!$v.currentData.groupId.required" class="invalid-feedback">
+              Nhóm chuyên môn không được để trống.
             </div>
           </b-form-group>
         </b-col>
-
-        <b-col md="12">
-          <b-form-group>
-            <label>Nguyện vọng 1<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-teacher_1_id"
-                v-model="$v.currentData.teacher1Id.$model"
-                placeholder="Nhập nguyện vọng 1"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher1Id) }"
-            />
-            <div v-if="!$v.currentData.teacher1Id.required" class="invalid-feedback">
-              Nguyện vọng 1 không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
-            <label>Nguyện vọng 2<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-teacher_2_id"
-                v-model="$v.currentData.teacher2Id.$model"
-                placeholder="Nhập nguyện vọng 2"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher2Id) }"
-            />
-            <div v-if="!$v.currentData.teacher2Id.required" class="invalid-feedback">
-              Nguyện vọng 2 không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
-            <label>Nguyện vọng 3<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-teacher_3_id"
-                v-model="$v.currentData.teacher3Id.$model"
-                placeholder="Nhập nguyện vọng 3"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher3Id) }"
-            />
-            <div v-if="!$v.currentData.teacher3Id.required" class="invalid-feedback">
-              Nguyện vọng 3 không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-
       </b-row>
       <template #modal-footer>
         <b-button
             class="mr-2 btn-light2 pull-right"
-            @click="closeModalCreateStudentProjectCompartment"
+            @click="closeModalCreateSubjectCompartment"
         >
           Hủy
         </b-button>
         <b-button
             variant="primary pull-right"
-            @click.prevent="handleCreateStudentProject"
+            @click.prevent="handleCreateSubject"
         >
           Đồng ý
         </b-button>
@@ -237,7 +195,7 @@
     </b-modal>
 
     <b-modal
-        id="modal-upload-student-project"
+        id="modal-upload-subject"
         :modal-class="['ghtk-modal']"
         :header-class="['modal__header']"
         :no-close-on-backdrop="true"
@@ -246,7 +204,7 @@
     >
       <template slot="modal-header">
         <div class="modal__header--item title font-weight-500">
-          Upload file ds sinh viên
+          Upload file ds học phần
         </div>
         <div class="modal__header--item close-btn px-2" @click="closeModalUpload">
           <i class="fas fa-times"></i>
@@ -258,11 +216,10 @@
         </b-col>
         <b-col md="6">
           <a
-              :href="SAMPLE_STUDENT_PROJECT_IMPORT_LINK"
+              :href="SAMPLE_SUBJECT_IMPORT_LINK"
               target="_self"
               style="font-weight: bold;color:black!important;"
-          >Format_ThemSV</a
-          >
+          >Format_ThemHP</a>
         </b-col>
       </b-row>
       <b-row class="mt-3">
@@ -302,19 +259,20 @@
         </div>
       </div>
     </b-modal>
+
   </b-form>
 </template>
 <script>
 import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
 import {
-  CREATE_STUDENT_PROJECT,
-  FETCH_STUDENT_PROJECTS,
-  UPDATE_STUDENT_PROJECT
+  CREATE_SUBJECT,
+  FETCH_SUBJECTS,
+  UPDATE_SUBJECT
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatDate2, formatTime} from "@/common/utils";
-import {PAGINATION_OPTIONS, SAMPLE_STUDENT_PROJECT_IMPORT_LINK} from "@/common/config"
+import {checkPermission, formatCurrencyToString, formatDate2, formatTime} from "@/common/utils";
+import {PAGINATION_OPTIONS, SAMPLE_SUBJECT_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
 import moment from 'moment-timezone';
@@ -324,37 +282,26 @@ import * as XLSX from "xlsx";
 const initData = {
   id: null,
   name: null,
-  studentCode: null,
-  classId: null,
+  code: null,
   page: 1,
   pageSize: 20
 }
 
-const initStudentProject = {
+const initSubject = {
   id: null,
   name: null,
-  studentCode: null,
-  classId: null,
-  isAssigned: null,
-  teacher1Id: null,
-  teacher2Id: null,
-  teacher3Id: null,
-  teacherAssignedId: null,
+  code: null,
+  groupId: null,
 }
 
 const initNewDataExcel = {
   name: null,
-  studentCode: null,
-  classId: null,
-  isAssigned: null,
-  teacher1Id: null,
-  teacher2Id: null,
-  teacher3Id: null,
-  teacherAssignedId: null,
+  code: null,
+  groupId: null,
 };
 
 export default {
-  name: "StudentProjects",
+  name: "Subjects",
   components: {PageTitle, DatePicker},
   mixins: [baseMixins],
   data() {
@@ -364,10 +311,10 @@ export default {
       updatedAtTo: new Date(),
       totalRow: 0,
       PAGINATION_OPTIONS,
-      SAMPLE_STUDENT_PROJECT_IMPORT_LINK,
-      subheading: "Quản lý danh sách sinh viên đăng ký đồ án.",
+      SAMPLE_SUBJECT_IMPORT_LINK,
+      subheading: "Quản lý danh sách học phần.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
-      heading: "Danh sách sinh viên đăng ký đồ án",
+      heading: "Danh sách học phần",
       loadingHeader: true,
       dataFilter: Object.assign({}, {
         ...initData,
@@ -390,14 +337,9 @@ export default {
           visible: true,
           thStyle: {width: '3%'}
         },
-        {key: "name", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
-        {key: "studentCode", label: "Mã sinh viên", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "classId", label: "Mã lớp", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "isAssigned", label: "Trạng thái gán GV", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "teacher1Id", label: "Nguyện vọng 1", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "teacher2Id", label: "Nguyện vọng 2", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "teacher3Id", label: "Nguyện vọng 3", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "teacherAssignedId", label: "Giảng viên phụ trách", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "name", label: "Tên học phần", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
+        {key: "code", label: "Mã học phần", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "groupId", label: "Nhóm chuyên môn", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "actions",
           label: "Chức năng",
@@ -410,10 +352,9 @@ export default {
         placeholder1: "Chọn",
         inputClass: "form-control",
       },
-      requestTimeFilter: null,
       actionType: null,
       userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null,
-      currentData: Object.assign({}, {...initStudentProject}),
+      currentData: Object.assign({}, {...initSubject}),
       currentDetail: null,
       currentFile: null,
       isUpdate: false,
@@ -424,11 +365,8 @@ export default {
   validations: {
     currentData: {
       name: {required},
-      studentCode: {required},
-      classId: {required},
-      teacher1Id: {required},
-      teacher2Id: {required},
-      teacher3Id: {required},
+      code: {required},
+      groupId: {required},
     },
   },
   mounted() {
@@ -441,11 +379,11 @@ export default {
       this.selectedPageSize = {text: this.dataFilter.pageSize}
     }
 
-    this.fetchStudentProjects();
+    this.fetchSubjects();
   },
   watch: {},
   computed: {
-    ...mapGetters(["studentProjects"]),
+    ...mapGetters(["subjects"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
     },
@@ -456,17 +394,17 @@ export default {
     handleDataFilter() {
       this.dataFilter.id = this.id ? this.id.value : null;
       this.dataFilter.name = this.name ? this.name.value : null;
-      this.dataFilter.studentCode = this.studentCode ? this.name.studentCode : null;
-      this.dataFilter.classId = this.classId ? this.classId.value : null;
+      this.dataFilter.code = this.code ? this.code.value : null;
+      this.dataFilter.groupId = this.groupId === null ? null : this.groupId.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
     reload() {
-      this.fetchStudentProjects();
+      this.fetchSubjects();
     },
     checkPermission,
-    async fetchStudentProjects() {
-      let res = await this.$store.dispatch(FETCH_STUDENT_PROJECTS, this.dataFilter)
+    async fetchSubjects() {
+      let res = await this.$store.dispatch(FETCH_SUBJECTS, this.dataFilter)
       if (res && res.length > 0 && res.length === this.dataFilter.pageSize) {
         this.totalRow = 1000000000;
       } else {
@@ -481,61 +419,60 @@ export default {
     },
     changePage(e) {
       this.dataFilter.page = e
-      router.push({path: '/admin/student-projects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchStudentProjects();
+      router.push({path: '/admin/subjects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
+      this.fetchSubjects();
     },
     changePageSize(e) {
       if (e) {
         this.dataFilter.pageSize = e.text
         this.dataFilter.page = 1
       }
-      router.push({path: '/admin/student-projects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchStudentProjects();
+      router.push({path: '/admin/subjects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
+      this.fetchSubjects();
     },
     handleSearch(event) {
       event.preventDefault();
       this.handleDataFilter();
-      router.push({path: '/admin/student-projects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchStudentProjects();
+      router.push({path: '/admin/subjects', query: {dataSearch: JSON.stringify(this.dataFilter)}})
+      this.fetchSubjects();
     },
     handleReset() {
-      this.$router.replace('/admin/student-projects')
+      this.$router.replace('/admin/subjects')
       this.dataFilter = Object.assign({}, {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
       this.name = '';
-      this.studentCode = '';
-      this.classId = '';
+      this.code = '';
       this.id = '';
       this.handleDataFilter();
-      this.fetchStudentProjects();
+      this.fetchSubjects();
     },
-    openModalCreateStudentProjectCompartment(studentProject, isUpdate) {
+    openModalCreateSubjectCompartment(subject, isUpdate) {
       this.isUpdate = isUpdate
 
       if (isUpdate) {
         this.currentData = Object.assign({}, {
-          ...studentProject,
+          ...subject,
         });
       } else {
         this.currentData = Object.assign({}, {
-          ...initStudentProject,
+          ...initSubject,
         });
       }
-      this.$root.$emit("bv::show::modal", 'update-student-project');
+      this.$root.$emit("bv::show::modal", 'update-subject');
     },
-    closeModalCreateStudentProjectCompartment() {
-      this.currentData = Object.assign({}, {...initStudentProject})
+    closeModalCreateSubjectCompartment() {
+      this.currentData = Object.assign({}, {...initSubject})
       this.$nextTick(() => {
         this.$v.currentData.$reset();
       });
-      this.$root.$emit("bv::hide::modal", 'update-student-project')
+      this.$root.$emit("bv::hide::modal", 'update-subject')
     },
     validationStatus: function (validation) {
       return typeof validation != "undefined" ? validation.$error : false;
     },
-    async handleCreateStudentProject() {
+    async handleCreateSubject() {
       this.$v.$reset();
       this.$v.$touch();
 
@@ -543,51 +480,47 @@ export default {
       const payload = {
         id: this.isUpdate ? this.currentData.id : null,
         name: this.currentData.name,
-        studentCode: this.currentData.studentCode,
-        classId: this.currentData.studentCode,
-        teacher1Id: this.currentData.teacher1Id,
-        teacher2Id: this.currentData.teacher2Id,
-        teacher3Id: this.currentData.teacher3Id,
-        teacherAssignedId: this.currentData.teacherAssignedId,
+        code: this.currentData.code,
+        groupId: this.currentData.groupId,
       }
 
       if (this.isUpdate) {
-        const res = await this.$store.dispatch(UPDATE_STUDENT_PROJECT, payload)
+        const res = await this.$store.dispatch(UPDATE_SUBJECT, payload)
         if (res && res.status === 200) {
           clearTimeout(this.handleDelay)
           this.handleDelay = setTimeout(() => {
             this.$message({
-              message: 'Cập nhật thông tin sinh viên thành công',
+              message: 'Cập nhật thông tin học phần thành công',
               type: "success",
               showClose: true,
             });
-            this.closeModalCreateStudentProjectCompartment()
-            this.fetchStudentProjects()
+            this.closeModalCreateSubjectCompartment()
+            this.fetchSubjects()
           }, 1000)
         }
       } else {
-        const res = await this.$store.dispatch(CREATE_STUDENT_PROJECT, payload)
+        const res = await this.$store.dispatch(CREATE_SUBJECT, payload)
         if (res && res.status === 200) {
           clearTimeout(this.handleDelay)
           this.handleDelay = setTimeout(() => {
             this.$message({
-              message: 'Thêm mới sinh viên thành công',
+              message: 'Thêm mới học phần thành công',
               type: "success",
               showClose: true,
             });
-            this.closeModalCreateStudentProjectCompartment()
-            this.fetchStudentProjects()
+            this.closeModalCreateSubjectCompartment()
+            this.fetchSubjects()
           }, 1000)
         }
       }
     },
-    openModalUploadStudentProject() {
-      this.$root.$emit("bv::show::modal", 'modal-upload-student-project')
+    openModalUploadSubject() {
+      this.$root.$emit("bv::show::modal", 'modal-upload-subject')
     },
     closeModalUpload() {
       this.currentDetail = null
       this.currentFile = null
-      this.$root.$emit("bv::hide::modal", 'modal-upload-student-project')
+      this.$root.$emit("bv::hide::modal", 'modal-upload-subject')
     },
     handleResetFile() {
       this.uploadDataExcel = []
@@ -622,38 +555,29 @@ export default {
       this.dataExcel = json
           .filter((item, index) => index !== 0)
           .map((item, index) => {
-            let studentProject = Object.assign({});
+            let subject = Object.assign({});
 
             item.forEach((itemValue, indexValue) => {
               if (json[0][indexValue]) {
                 let newAttribute = '';
                 switch (json[0][indexValue]) {
-                  case 'Họ và tên':
+                  case 'Tên học phần':
                     newAttribute = 'name';
                     break;
-                  case 'Mã sinh viên':
-                    newAttribute = 'studentCode';
+                  case 'Mã học phần':
+                    newAttribute = 'code';
                     break;
-                  case 'Mã lớp':
-                    newAttribute = 'classId';
-                    break;
-                  case 'Nguyện vọng 1':
-                    newAttribute = 'teacher1Id';
-                    break;
-                  case 'Nguyện vọng 2':
-                    newAttribute = 'teacher2Id';
-                    break;
-                  case 'Nguyện vọng 3':
-                    newAttribute = 'teacher3Id';
+                  case 'Nhóm chuyên môn':
+                    newAttribute = 'groupId';
                     break;
                   default:
                     break;
                 }
-                studentProject[newAttribute] = itemValue;
+                subject[newAttribute] = itemValue;
               }
             });
 
-            return studentProject;
+            return subject;
           });
     },
     async handleUploadDataExcel() {
@@ -670,23 +594,19 @@ export default {
       this.dataExcel.forEach(item => {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
-        newData.studentCode = item.studentCode ? item.studentCode : null;
-        newData.classId = item.classId ? item.classId : null
-        newData.teacher1Id = item.teacher1Id ? item.teacher1Id : null
-        newData.teacher2Id = item.teacher2Id ? item.teacher2Id : null
-        newData.teacher3Id = item.teacher3Id ? item.teacher3Id : null
+        newData.code = item.code ? item.code : null;
+        newData.groupId = item.groupId ? item.groupId : null
 
         this.uploadDataExcel.push({...newData})
       });
 
       this.loadingFile = true;
       const dataFiltered = this.uploadDataExcel.filter((item) => {
-        return item.name !== null &&
-            item.code != null;
+        return item.fullName !== null;
       });
 
-      let res = await this.post('/student-project/upload-excel', {
-        studentProjectCreateRequests: dataFiltered
+      let res = await this.post('/subject/upload-excel', {
+        subjectCreateRequests: dataFiltered
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -708,7 +628,7 @@ export default {
 
         setTimeout(() => {
           this.closeModalUpload();
-          this.fetchStudentProjects();
+          this.fetchSubjects();
         }, 1000);
       }
     },
@@ -750,7 +670,7 @@ export default {
   font-size: 15px;
 }
 
-#modal-upload-student-project .modal-footer {
+#modal-upload-subject .modal-footer {
   display: none;
 }
 

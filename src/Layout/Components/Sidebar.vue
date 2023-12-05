@@ -45,22 +45,6 @@ export default {
       sidebarActive: false,
       menu: [
         {
-          title: "Quản lý ví điện tử",
-          icon: 'fa fa-wallet',
-          child: [
-            {
-              href: "/admin/user-wallet",
-              title: "Danh sách ví",
-              permission: 'user_list'
-            },
-            {
-              href: "/admin/accounts",
-              title: "Danh sách ngăn ví",
-              permission: 'account_list'
-            }
-          ],
-        },
-        {
           title: "Quản lý giảng viên",
           icon: 'fa fa-user',
           child: [
@@ -79,6 +63,17 @@ export default {
               href: "/admin/group-teachers",
               title: "Danh sách nhóm chuyên môn",
               permission: 'group_teacher_search'
+            }
+          ],
+        },
+        {
+          title: "Quản lý học phần",
+          icon: 'fa fa-wallet',
+          child: [
+            {
+              href: "/admin/subjects",
+              title: "Danh sách học phần",
+              permission: 'subject_search'
             }
           ],
         },

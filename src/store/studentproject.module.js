@@ -8,18 +8,18 @@ import baseMixins from "../components/mixins/base"
 import {SET_STUDENT_PROJECTS} from "@/store/mutation.type";
 
 const state = {
-  studentprojects: [],
+  studentProjects: [],
 }
 
 const getters = {
-  studentprojects(state) {
-    return state.studentprojects
+  studentProjects(state) {
+    return state.studentProjects
   },
 }
 
 const mutations = {
   [SET_STUDENT_PROJECTS] (state, payload) {
-    state.studentprojects = payload
+    state.studentProjects = payload
   },
 }
 

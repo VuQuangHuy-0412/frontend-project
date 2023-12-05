@@ -10,7 +10,8 @@ import event from "./event.module"
 import teacher from "./teacher.module"
 import groupTeacher from "./groupteacher.module"
 import classes from "./class.module"
-import studentproject from "./studentproject.module"
+import studentProject from "./studentproject.module"
+import subject from "./subject.module"
 
 Vue.use(Vuex);
 
@@ -24,7 +25,8 @@ export default new Vuex.Store({
     teacher,
     groupTeacher,
     classes,
-    studentproject,
+    studentProject,
+    subject,
     file,
     event,
   }
