@@ -70,6 +70,9 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
+          <template #cell(leader)="row">
+            {{ row.item.leaderInfo ? row.item.leaderInfo.fullName : "" }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -270,6 +273,7 @@ const initGroupTeacher = {
   name: null,
   description: null,
   leader: null,
+  leaderInfo: null,
 }
 
 const initNewDataExcel = {
