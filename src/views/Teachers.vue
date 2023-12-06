@@ -125,6 +125,9 @@
             Phó Giáo sư
           </span>
           </template>
+          <template #cell(groupTeacher)="row">
+            {{ concatGroupTeacher(row.item.groupTeacher) }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -203,6 +206,18 @@
             <div v-if="!$v.currentData.rankAndDegree.required" class="invalid-feedback">
               Học hàm học vị không được để trống.
             </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Nhóm chuyên môn:</label>
+            <b-form-select
+                :options="optionsGroupTeacher.filter(group => group.value !== null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.groupTeacher"
+            >
+            </b-form-select>
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -298,7 +313,7 @@
         <b-col md="6">
           <div style="font-weight: bold; color:black!important;" v-if="currentFile">
             {{ currentFile.name }} <i @click="handleResetFile" class="fas fa-times"
-                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: gray"></i>
+                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: rgb(128,128,128)"></i>
           </div>
         </b-col>
       </b-row>
@@ -348,6 +363,7 @@ import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
 import {SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
+import MultiSelect from 'primevue/multiselect';
 
 const initData = {
   id: null,
@@ -366,6 +382,7 @@ const initTeacher = {
   rankAndDegree: null,
   startTime: null,
   birthday: null,
+  groupTeacher: null,
 }
 
 const initNewDataExcel = {
@@ -377,7 +394,7 @@ const initNewDataExcel = {
 
 export default {
   name: "Teachers",
-  components: {PageTitle, DatePicker},
+  components: {PageTitle, DatePicker, MultiSelect},
   mixins: [baseMixins],
   data() {
     return {
@@ -423,6 +440,7 @@ export default {
         },
         {key: "fullName", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "rankAndDegree", label: "Học hàm học vị", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "groupTeacher", label: "Nhóm chuyên môn", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "startTime",
           label: "Thời gian bắt đầu",
@@ -587,11 +605,11 @@ export default {
       this.isUpdate = isUpdate
 
       if (isUpdate) {
-        console.log(teacher);
         this.currentData = Object.assign({}, {
           ...teacher,
           startTime: new Date(teacher.startTime),
           birthday: new Date(teacher.birthday),
+          groupTeacher: teacher.groupTeacher[0].id,
         });
       } else {
         this.currentData = Object.assign({}, {
@@ -616,7 +634,6 @@ export default {
     async handleCreateTeacher() {
       this.$v.$reset();
       this.$v.$touch();
-      console.log(this.currentData);
 
       if (this.$v.currentData.$invalid) return
       const payload = {
@@ -625,6 +642,7 @@ export default {
         rankAndDegree: this.currentData.rankAndDegree,
         startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        groupTeacher: this.currentData.groupTeacher,
       }
 
       if (this.isUpdate) {
@@ -781,7 +799,7 @@ export default {
     },
     formatOptionsGroupTeacher(groupTeachers) {
       if (!groupTeachers) return []
-      let options = groupTeachers.map(item => {
+      let options = groupTeachers.map((item) => {
         return {text: item.name, value: item.id}
       })
 
@@ -802,6 +820,20 @@ export default {
         this.$store.commit(SET_ALL_GROUP_TEACHERS, response.data);
       }
     },
+    concatGroupTeacher(groupTeacher) {
+      if (groupTeacher === null || groupTeacher.length <= 0) {
+        return "";
+      }
+
+      let groupTeacherText = "";
+      groupTeacher.forEach((item, index) => {
+        if (index !== groupTeacher.length - 1)
+          groupTeacherText += item.name + ", ";
+        else
+          groupTeacherText += item.name;
+      })
+      return groupTeacherText;
+    }
   }
 }
 </script>

@@ -35,6 +35,8 @@
     "pe7-icon": "^1.0.4",
     "perfect-scrollbar": "^1.4.0",
     "popper.js": "^1.15.0",
+    "primeicons": "^6.0.1",
+    "primevue": "^2.10.4",
     "qrcode.vue": "1.7.0",
     "sass-loader": "^7.1.0",
     "v-calendar": "^2.3.1",
