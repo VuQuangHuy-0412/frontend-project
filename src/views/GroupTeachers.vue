@@ -76,6 +76,16 @@
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
+                  v-if="(userInfo && userInfo.permissions.indexOf('group_teacher_detail') !== -1 && row.item.id)"
+                  :href="`/admin/group-teacher/${row.item.id}`"
+                  class="m-1"
+                  type="button"
+                  title="Chi tiết nhóm chuyên môn"
+                  v-b-tooltip.hover
+              >
+                <font-awesome-icon :icon="['fas', 'info-circle']"/>
+              </a>
+              <a
                   v-if="userInfo && userInfo.permissions.indexOf('group_teacher_update') !== -1"
                   href="javascript:void(0)"
                   class="m-1"

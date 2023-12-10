@@ -54,6 +54,12 @@ const router = new Router({
       meta: { title: 'Quản lý nhóm chuyên môn', layout: 'default' }
     },
     {
+      path: '/admin/group-teacher/:id',
+      name: 'GroupTeacher',
+      component: () => import("@/views/GroupTeacherDetail"),
+      meta: { title: 'Chi tiết nhóm chuyên môn', layout: 'default' }
+    },
+    {
       path: '/admin/classes',
       name: 'Classes',
       component: () => import("@/views/Classes"),

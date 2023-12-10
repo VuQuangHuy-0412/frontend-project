@@ -2,15 +2,16 @@ import {
   CREATE_GROUP_TEACHER,
   FETCH_GROUP_TEACHERS,
   UPDATE_GROUP_TEACHER,
-  ALL_GROUP_TEACHER,
+  ALL_GROUP_TEACHER, GROUP_TEACHER_DETAIL,
 } from "./action.type";
 import { SUCCESS } from "@/common/config"
 import baseMixins from "../components/mixins/base"
-import {SET_GROUP_TEACHERS, SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
+import {SET_GROUP_TEACHERS, SET_ALL_GROUP_TEACHERS, SET_GROUP_TEACHER_DETAIL} from "@/store/mutation.type";
 
 const state = {
   groupTeachers: [],
   allGroupTeachers: [],
+  groupTeacherDetail: null,
 }
 
 const getters = {
@@ -20,6 +21,9 @@ const getters = {
   allGroupTeachers(state) {
     return state.allGroupTeachers
   },
+  groupTeacherDetail(state) {
+    return state.groupTeacherDetail
+  }
 }
 
 const mutations = {
@@ -29,6 +33,9 @@ const mutations = {
   [SET_ALL_GROUP_TEACHERS] (state, payload) {
     state.allGroupTeachers = payload
   },
+  [SET_GROUP_TEACHER_DETAIL] (state, payload) {
+    state.groupTeacherDetail = payload
+  }
 }
 
 const actions = {
@@ -60,6 +67,17 @@ const actions = {
       let response = await baseMixins.methods.getWithBigInt('/group-teacher/all', '', {})
       if (response && response.data && response.status === SUCCESS) {
         context.commit(SET_ALL_GROUP_TEACHERS, response.data)
+        resolve(response.data)
+      } else {
+        resolve(null)
+      }
+    })
+  },
+  [GROUP_TEACHER_DETAIL] (context, payload) {
+    return new Promise(async resolve => {
+      let response = await baseMixins.methods.getWithBigInt('/group-teacher/detail/' + payload.id, '', {})
+      if (response && response.data && response.status === SUCCESS) {
+        context.commit(SET_GROUP_TEACHER_DETAIL, response.data)
         resolve(response.data)
       } else {
         resolve(null)

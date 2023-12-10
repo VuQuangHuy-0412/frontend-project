@@ -210,18 +210,6 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Nhóm chuyên môn:</label>
-            <b-form-select
-                :options="optionsGroupTeacher.filter(group => group.value !== null)"
-                :searchable="true"
-                value-field="value" text-field="text"
-                v-model.trim="currentData.groupTeacher"
-            >
-            </b-form-select>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
             <label>Thời gian bắt đầu<span class="text-danger">*</span>:</label>
             <div :class="{'invalid-date': validationStatus($v.currentData.startTime)}">
               <date-picker
@@ -355,7 +343,7 @@ import {
   UPDATE_TEACHER
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatCurrencyToString, formatDate2, formatTime} from "@/common/utils";
+import {checkPermission, formatDate2, formatTime} from "@/common/utils";
 import {PAGINATION_OPTIONS, SAMPLE_TEACHER_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
@@ -543,9 +531,9 @@ export default {
       this.dataFilter.id = this.id !== '' ? this.dataFilter.id : null;
       this.dataFilter.fullName = this.fullName !== '' ? this.dataFilter.fullName : null;
       this.dataFilter.rankAndDegree = this.selectedRankAndDegree === null ? null : this.selectedRankAndDegree.value;
-      this.dataFilter.groupTeacher = this.selectedGroupTeacher === null ? null : this.selectedGroupTeacher.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
+      this.dataFilter.groupTeacher = this.selectedGroupTeacher == null ? null : this.selectedGroupTeacher.value;
     },
     reload() {
       this.fetchTeachers();
@@ -609,7 +597,6 @@ export default {
           ...teacher,
           startTime: new Date(teacher.startTime),
           birthday: new Date(teacher.birthday),
-          groupTeacher: teacher.groupTeacher[0].id,
         });
       } else {
         this.currentData = Object.assign({}, {
@@ -642,7 +629,6 @@ export default {
         rankAndDegree: this.currentData.rankAndDegree,
         startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        groupTeacher: this.currentData.groupTeacher,
       }
 
       if (this.isUpdate) {
