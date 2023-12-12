@@ -2,7 +2,7 @@ import {
   CREATE_GROUP_TEACHER,
   FETCH_GROUP_TEACHERS,
   UPDATE_GROUP_TEACHER,
-  ALL_GROUP_TEACHER, GROUP_TEACHER_DETAIL,
+  ALL_GROUP_TEACHER, GROUP_TEACHER_DETAIL, ADD_TEACHER_TO_GROUP, UPDATE_ROLE_TEACHER,
 } from "./action.type";
 import { SUCCESS } from "@/common/config"
 import baseMixins from "../components/mixins/base"
@@ -84,6 +84,18 @@ const actions = {
       }
     })
   },
+  [ADD_TEACHER_TO_GROUP](context, payload) {
+    return new Promise(async resolve => {
+      let response = await baseMixins.methods.post('/group-teacher/add/teacher', payload)
+      resolve(response)
+    })
+  },
+  [UPDATE_ROLE_TEACHER](context, payload) {
+    return new Promise(async resolve => {
+      let response = await baseMixins.methods.post('/group-teacher/update/teacher', payload)
+      resolve(response)
+    })
+  }
 }
 export default {
   state,
