@@ -8,9 +8,9 @@
     <div class="app-header__logo">
       <img
           class="logo-header-ghtk"
-          src="@/assets/static/images/giao_hang_tiet_kiem.png"
+          src="@/assets/static/images/download.png"
       />
-      <span class="title-logo">Giaohangtietkiem.vn</span>
+      <span class="title-logo">SOICT HUST</span>
     </div>
     <div class="app-sidebar-content custom-box-shadow">
       <VuePerfectScrollbar class="app-sidebar-scroll" v-once>
@@ -97,6 +97,38 @@ export default {
               title: "Danh sách sinh viên đăng kí đồ án",
               permission: 'student_project_search'
             }
+          ],
+        },
+        {
+          title: "Quản lý ràng buộc",
+          icon: 'fa fa-wallet',
+          child: [
+            {
+              href: "/admin/constraints",
+              title: "Danh sách ràng buộc",
+              permission: 'constraint_search'
+            }
+          ],
+        },
+        {
+          title: "Quản trị",
+          icon: 'fa fa-user',
+          child: [
+            {
+              href: "/admin/user",
+              title: "Người dùng",
+              permission: 'admin_user_list'
+            },
+            {
+              href: "/admin/role",
+              title: "Vai trò và quyền hạn",
+              permission: 'role_list'
+            },
+            {
+              href: "/admin/log",
+              title: "Log hệ thống",
+              permission: 'admin_log_list'
+            },
           ],
         },
       ],

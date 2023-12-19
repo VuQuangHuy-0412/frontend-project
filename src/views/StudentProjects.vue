@@ -682,7 +682,7 @@ export default {
       this.loadingFile = true;
       const dataFiltered = this.uploadDataExcel.filter((item) => {
         return item.name !== null &&
-            item.code != null;
+            item.code !== null;
       });
 
       let res = await this.post('/student-project/upload-excel', {

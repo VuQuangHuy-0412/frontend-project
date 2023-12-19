@@ -9,3 +9,5 @@ export const SET_GROUP_TEACHER_DETAIL = 'setGroupTeacherDetail'
 export const SET_CLASSES = 'setClass'
 export const SET_STUDENT_PROJECTS = 'setStudentProject'
 export const SET_SUBJECTS = 'setSubject'
+export const SET_CONSTRAINTS = 'setConstraint'
+

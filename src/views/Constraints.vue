@@ -13,63 +13,16 @@
       <template v-else>
         <b-row class="mb-2">
           <b-col md="2">
-            <div class="label-form">ID</div>
-            <b-input type="text" placeholder="Nhập ID" v-model.trim="dataFilter.id"/>
-          </b-col>
-          <b-col md="2">
-            <div class="label-form">Họ và tên</div>
-            <b-input type="text" placeholder="Nhập họ và tên" v-model.trim="dataFilter.fullName"/>
-          </b-col>
-          <b-col md="2">
-            <div class="label-form">Học hàm học vị</div>
-            <multiselect v-model="selectedRankAndDegree" track-by="text" label="text" :show-labels="false"
-                         placeholder="Chọn" :options="optionsRankAndDegree" :searchable="true">
+            <div class="label-form">Trạng thái</div>
+            <multiselect v-model="selectedStatus" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsStatus" :searchable="true">
               <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
             </multiselect>
-          </b-col>
-          <b-col md="2">
-            <div class="label-form">Nhóm chuyên môn</div>
-            <multiselect v-model="selectedGroupTeacher" track-by="text" label="text" :show-labels="false"
-                         placeholder="Chọn" :options="optionsGroupTeacher" :searchable="true">
-              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
-            </multiselect>
-          </b-col>
-          <b-col md="2">
-            <div class="label-form">Thời gian bắt đầu từ</div>
-            <date-picker
-                :disabled-date="(date) => date >= new Date()"
-                input-error
-                class="w-100"
-                input-class="form-control"
-                v-model.trim="startTimeFrom"
-                format="DD/MM/YYYY"
-                placeholder="Chọn"
-            />
-          </b-col>
-          <b-col md="2">
-            <div class="label-form">Thời gian bắt đầu đến</div>
-            <date-picker
-                :disabled-date="(date) => date >= new Date()"
-                input-error
-                class="w-100"
-                input-class="form-control"
-                v-model.trim="startTimeTo"
-                format="DD/MM/YYYY"
-                placeholder="Chọn"
-            />
           </b-col>
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
-            </b-button>
-            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadTeacher"
-                      style="border: none">
-              <font-awesome-icon :icon="['fas','file-excel']"/>
-              <span v-if="!loadingFile"
-              ><i class="fas fa-upload"></i> Upload file
-              </span>
-              <i v-if="loadingFile" class="fa fa-spinner fa-spin"/>
             </b-button>
             <b-button class="mr-2" variant="light" @click="handleReset">
               <font-awesome-icon :icon="['fas', 'eraser']"/>
@@ -78,21 +31,21 @@
           </b-col>
           <b-col md="8" class="text-right mt-30">
             <b-button
-                v-if="checkPermission('teacher_create')"
+                v-if="checkPermission('constraint_create')"
                 variant="primary"
                 class="custom-btn-add-common"
                 style="background: orange; border: none"
-                @click="openModalCreateTeacherCompartment(null, false)"
+                @click="openModalCreateConstraintCompartment(null, false)"
             >
               <font-awesome-icon :icon="['fas','plus']"/>
-              Thêm giảng viên
+              Thêm ràng buộc
             </b-button>
           </b-col>
         </b-row>
 
         <b-table
             class="mt-3"
-            :items="teachers.data"
+            :items="constraints.data"
             :fields="visibleFields"
             :bordered="true"
             :hover="true"
@@ -108,76 +61,45 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
-          <template #cell(rankAndDegree)="row">
-          <span v-if="row.item.rankAndDegree === 'GV'">
-            Giảng viên
+          <template #cell(status)="row">
+          <span v-if="row.item.status === 1">
+            Hoạt động
           </span>
-            <span v-if="row.item.rankAndDegree === 'ThS'">
-            Thạc sĩ
-          </span>
-            <span v-if="row.item.rankAndDegree === 'TS'">
-            Tiến sĩ
-          </span>
-            <span v-if="row.item.rankAndDegree === 'GS'">
-            Giáo sư
-          </span>
-            <span v-if="row.item.rankAndDegree === 'PGS'">
-            Phó Giáo sư
+            <span v-if="row.item.status === 0">
+            Không hoạt động
           </span>
           </template>
-          <template #cell(groupTeacher)="row">
-            {{ concatGroupTeacher(row.item.groupTeacher) }}
-          </template>
-          <template #cell(rating)="row">
-            {{ row.item.rating ? row.item.rating + "/5" : "" }}
-          </template>
+<!--          <template #cell(content)="row">-->
+<!--            {{ concatGroupTeacher(row.item.groupTeacher) }}-->
+<!--          </template>-->
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
-                  v-if="userInfo && userInfo.permissions.indexOf('teacher_update') !== -1"
+                  v-if="userInfo && userInfo.permissions.indexOf('constraint_update') !== -1"
                   href="javascript:void(0)"
                   class="m-1"
                   type="button"
-                  title="Cập nhật thông tin giảng viên"
+                  title="Cập nhật ràng buộc"
                   v-b-tooltip.hover
-                  @click.prevent="openModalCreateTeacherCompartment(row.item, true)">
+                  @click.prevent="openModalCreateConstraintCompartment(row.item, true)">
                 <font-awesome-icon :icon="['fas', 'edit']"/>
               </a>
             </div>
           </template>
         </b-table>
-        <b-row v-if="teachers.data && teachers.data.length === 0 && this.dataFilter.page === 1"
+        <b-row v-if="constraints.data && constraints.data.length === 0"
                class="justify-content-center">
           <span>Không tìm thấy bản ghi nào</span>
-        </b-row>
-        <b-row v-else>
-          <b-col class="pagination">
-            <b-pagination
-                hide-goto-end-buttons
-                v-model="dataFilter.page"
-                :per-page="dataFilter.pageSize"
-                :total-rows="totalRow"
-                @change="changePage"
-            ></b-pagination>
-            <multiselect v-model="selectedPageSize" track-by="text" label="text" :show-labels="false"
-                         class="pageSize"
-                         placeholder="Chọn"
-                         @input="changePagination"
-                         @select="changePageSize"
-                         :options="PAGINATION_OPTIONS" :searchable="true" :allow-empty="false">
-              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }} / trang</template>
-            </multiselect>
-          </b-col>
         </b-row>
       </template>
     </b-card>
 
     <b-modal
-        id="update-teacher"
-        :title="isUpdate ? 'Cập nhật thông tin giảng viên' : 'Thêm mới giảng viên'"
+        id="update-constraint"
+        :title="isUpdate ? 'Cập nhật thông tin ràng buộc' : 'Thêm mới ràng buộc'"
         :no-close-on-backdrop="true"
         size="lg"
-        @hidden="closeModalCreateTeacherCompartment"
+        @hidden="closeModalCreateConstraintCompartment"
     >
       <b-row>
         <b-col md="12">
@@ -208,51 +130,6 @@
             </b-form-select>
             <div v-if="!$v.currentData.rankAndDegree.required" class="invalid-feedback">
               Học hàm học vị không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
-            <label>Số giờ GD<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-gd-time"
-                v-model="$v.currentData.gdTime.$model"
-                placeholder="Nhập số giờ GD"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.gdTime) }"
-            />
-            <div v-if="!$v.currentData.gdTime.required" class="invalid-feedback">
-              Số giờ GD không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
-            <label>Số giờ HD<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-hd-time"
-                v-model="$v.currentData.hdTime.$model"
-                placeholder="Nhập số giờ HD"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.hdTime) }"
-            />
-            <div v-if="!$v.currentData.hdTime.required" class="invalid-feedback">
-              Số giờ HD không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group>
-            <label>Rating<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-gd-time"
-                v-model="$v.currentData.rating.$model"
-                placeholder="Nhập rating"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.rating) }"
-            />
-            <div v-if="!$v.currentData.gdTime.required" class="invalid-feedback">
-              Rating không được để trống.
             </div>
           </b-form-group>
         </b-col>
@@ -419,9 +296,6 @@ const initTeacher = {
   startTime: null,
   birthday: null,
   groupTeacher: null,
-  gdTime: null,
-  hdTime: null,
-  rating: null
 }
 
 const initNewDataExcel = {
@@ -429,9 +303,6 @@ const initNewDataExcel = {
   rankAndDegree: null,
   startTime: null,
   birthday: null,
-  gdTime: null,
-  hdTime: null,
-  rating: null
 };
 
 export default {
@@ -483,9 +354,6 @@ export default {
         {key: "fullName", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "rankAndDegree", label: "Học hàm học vị", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "groupTeacher", label: "Nhóm chuyên môn", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "gdTime", label: "Số giờ GD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "hdTime", label: "Số giờ HD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "rating", label: "Rating", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "startTime",
           label: "Thời gian bắt đầu",
@@ -544,9 +412,6 @@ export default {
       rankAndDegree: {required},
       startTime: {required},
       birthday: {required},
-      gdTime: {required},
-      hdTime: {required},
-      rating: {required},
     },
   },
   mounted() {
@@ -687,9 +552,6 @@ export default {
         id: this.isUpdate ? this.currentData.id : null,
         fullName: this.currentData.fullName,
         rankAndDegree: this.currentData.rankAndDegree,
-        gdTime: this.currentData.gdTime,
-        hdTime: this.currentData.hdTime,
-        rating: this.currentData.rating,
         startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       }
@@ -783,15 +645,6 @@ export default {
                   case 'Ngày sinh':
                     newAttribute = 'birthday';
                     break;
-                  case 'Số giờ GD':
-                    newAttribute = 'gdTime';
-                    break;
-                  case 'Số giờ HD':
-                    newAttribute = 'hdTime';
-                    break;
-                  case 'Rating':
-                    newAttribute = 'rating';
-                    break;
                   default:
                     break;
                 }
@@ -819,9 +672,6 @@ export default {
         newData.rankAndDegree = item.rankAndDegree ? item.rankAndDegree : null;
         newData.startTime = item.startTime ? item.startTime : null
         newData.birthday = item.birthday ? item.birthday : null
-        newData.gdTime = item.gdTime ? item.gdTime : null
-        newData.hdTime = item.hdTime ? item.hdTime : null
-        newData.rating = item.rating ? item.rating : null
 
         this.uploadDataExcel.push({...newData})
       });

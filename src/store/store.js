@@ -12,6 +12,7 @@ import groupTeacher from "./groupteacher.module"
 import classes from "./class.module"
 import studentProject from "./studentproject.module"
 import subject from "./subject.module"
+import constraint from "./constraint.module"
 
 Vue.use(Vuex);
 
@@ -29,5 +30,6 @@ export default new Vuex.Store({
     subject,
     file,
     event,
+    constraint,
   }
 });

@@ -15,7 +15,13 @@ const router = new Router({
     {
       path: '/',
       name: 'DefaultPage',
-      meta: { title: 'Quản lý ví điện tử', layout: 'default' }
+      meta: { title: 'Quản lý giảng dạy', layout: 'default' }
+    },
+    {
+      path: '/admin/user',
+      name: 'AdminUser',
+      component: () => import("@/views/AdminUser"),
+      meta: { title: 'Quản lý tài khoản', layout: 'default' }
     },
     {
       path: '/admin/role',
@@ -76,6 +82,12 @@ const router = new Router({
       name: 'Subjects',
       component: () => import("@/views/Subjects"),
       meta: { title: 'Quản lý học phần', layout: 'default' }
+    },
+    {
+      path: '/admin/constraints',
+      name: 'Constraints',
+      component: () => import("@/views/Constraints"),
+      meta: { title: 'Quản lý ràng buộc', layout: 'default' }
     },
   ]
 });

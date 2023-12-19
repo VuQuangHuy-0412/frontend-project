@@ -469,7 +469,7 @@ export default {
           thClass: 'align-middle'
         },
         {
-          key: "TimeOfDay",
+          key: "timeOfDay",
           label: "Tiết trong ngày",
           visible: true,
           thStyle: "width: 6%",

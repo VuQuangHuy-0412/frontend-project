@@ -612,3 +612,56 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.disabled-icon {
+  cursor: not-allowed;
+  color: #838790 !important;
+  opacity: 0.5;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 13px;
+}
+</style>
+<style>
+.custom-file-label {
+  height: 120px;
+  border: 1px dashed #01904a;
+  justify-content: center;
+  display: flex;
+  align-items: end;
+  padding: 20px;
+}
+.custom-file-label::after {
+  content: 'Chọn file' !important;
+  position: relative !important;
+  background: none;
+  border: none;
+  padding: 0;
+  height: unset;
+  margin-left: 5px;
+  color: #01904a;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+#modal-upload-group-teacher-mapping .modal-footer {
+  display: none;
+}
+
+.custom-upload {
+  font-size: 35px;
+  color: #01904a;
+  position: absolute;
+  z-index: 1000;
+  top: 120px;
+  left: 46%;
+}
+
+.custom-file-label {
+  font-weight: bold;
+  font-size: 15px;
+}
+</style>
