@@ -111,6 +111,28 @@ export default {
           ],
         },
         {
+          title: "Phân công GD và HD",
+          icon: 'fa fa-wallet',
+          child: [
+            {
+              href: "/admin/constraints",
+              title: "Danh sách ràng buộc",
+              permission: 'constraint_search'
+            }
+          ],
+        },
+        {
+          title: "Xuất dữ liệu phân công",
+          icon: 'fa fa-wallet',
+          child: [
+            {
+              href: "/admin/constraints",
+              title: "Danh sách ràng buộc",
+              permission: 'constraint_search'
+            }
+          ],
+        },
+        {
           title: "Quản trị",
           icon: 'fa fa-user',
           child: [
