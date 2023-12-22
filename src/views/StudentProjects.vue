@@ -25,8 +25,8 @@
             <b-input type="text" placeholder="Nhập mã sinh viên" v-model.trim="dataFilter.studentCode"/>
           </b-col>
           <b-col md="2">
-            <div class="label-form">Mã lớp</div>
-            <b-input type="text" placeholder="Nhập mã lớp" v-model.trim="dataFilter.classId"/>
+            <div class="label-form">Số giờ HD</div>
+            <b-input type="text" placeholder="Nhập số giờ HD" v-model.trim="dataFilter.timeHd"/>
           </b-col>
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
@@ -159,16 +159,16 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Lớp học<span class="text-danger">*</span>:</label>
+            <label>Số giờ HD<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-class-id"
-                v-model="$v.currentData.classId.$model"
-                placeholder="Nhập mã lớp học"
+                v-model="$v.currentData.timeHd.$model"
+                placeholder="Nhập số giờ HD"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.classId) }"
+                :class="{ 'is-invalid': validationStatus($v.currentData.timeHd) }"
             />
-            <div v-if="!$v.currentData.classId.required" class="invalid-feedback">
-              Mã lớp học không được để trống.
+            <div v-if="!$v.currentData.timeHd.required" class="invalid-feedback">
+              Số giờ HD không được để trống.
             </div>
           </b-form-group>
         </b-col>
@@ -325,7 +325,7 @@ const initData = {
   id: null,
   name: null,
   studentCode: null,
-  classId: null,
+  timeHd: null,
   page: 1,
   pageSize: 20
 }
@@ -334,7 +334,7 @@ const initStudentProject = {
   id: null,
   name: null,
   studentCode: null,
-  classId: null,
+  timeHd: null,
   isAssigned: null,
   teacher1Id: null,
   teacher2Id: null,
@@ -345,7 +345,7 @@ const initStudentProject = {
 const initNewDataExcel = {
   name: null,
   studentCode: null,
-  classId: null,
+  timeHd: null,
   isAssigned: null,
   teacher1Id: null,
   teacher2Id: null,
@@ -392,7 +392,7 @@ export default {
         },
         {key: "name", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "studentCode", label: "Mã sinh viên", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "classId", label: "Mã lớp", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "timeHd", label: "Số giờ HD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "isAssigned", label: "Trạng thái gán GV", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "teacher1Id", label: "Nguyện vọng 1", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "teacher2Id", label: "Nguyện vọng 2", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
@@ -425,7 +425,7 @@ export default {
     currentData: {
       name: {required},
       studentCode: {required},
-      classId: {required},
+      timeHd: {required},
       teacher1Id: {required},
       teacher2Id: {required},
       teacher3Id: {required},
@@ -457,7 +457,7 @@ export default {
       this.dataFilter.id = this.id ? this.id.value : null;
       this.dataFilter.name = this.name ? this.name.value : null;
       this.dataFilter.studentCode = this.studentCode ? this.name.studentCode : null;
-      this.dataFilter.classId = this.classId ? this.classId.value : null;
+      this.dataFilter.timeHd = this.timeHd ? this.timeHd.value : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
@@ -506,7 +506,7 @@ export default {
       });
       this.name = '';
       this.studentCode = '';
-      this.classId = '';
+      this.timeHd = '';
       this.id = '';
       this.handleDataFilter();
       this.fetchStudentProjects();
@@ -544,7 +544,7 @@ export default {
         id: this.isUpdate ? this.currentData.id : null,
         name: this.currentData.name,
         studentCode: this.currentData.studentCode,
-        classId: this.currentData.studentCode,
+        timeHd: this.currentData.studentCode,
         teacher1Id: this.currentData.teacher1Id,
         teacher2Id: this.currentData.teacher2Id,
         teacher3Id: this.currentData.teacher3Id,
@@ -634,8 +634,8 @@ export default {
                   case 'Mã sinh viên':
                     newAttribute = 'studentCode';
                     break;
-                  case 'Mã lớp':
-                    newAttribute = 'classId';
+                  case 'Số giờ HD':
+                    newAttribute = 'timeHd';
                     break;
                   case 'Nguyện vọng 1':
                     newAttribute = 'teacher1Id';
@@ -671,7 +671,7 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
         newData.studentCode = item.studentCode ? item.studentCode : null;
-        newData.classId = item.classId ? item.classId : null
+        newData.timeHd = item.timeHd ? item.timeHd : null
         newData.teacher1Id = item.teacher1Id ? item.teacher1Id : null
         newData.teacher2Id = item.teacher2Id ? item.teacher2Id : null
         newData.teacher3Id = item.teacher3Id ? item.teacher3Id : null
