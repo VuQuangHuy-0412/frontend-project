@@ -25,6 +25,10 @@ module.exports = {
     }
   },
 
+  publicPath: process.env.NODE_ENV === 'production'
+      ? '/frontend-project/' // Thay tên repository của các bạn vào đây nhé
+      : '/',
+
   chainWebpack: config => {
     // Add "node_modules" alias
     config.resolve.alias.set(
