@@ -24,8 +24,6 @@ import "vue2-datepicker/index.css";
 import "vue2-datepicker/locale/vi";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 import Multiselect from "vue-multiselect";
-import Calendar from 'v-calendar/lib/components/calendar.umd'
-import DatePicker from 'v-calendar/lib/components/date-picker.umd'
 import { setupCalendar } from 'v-calendar'
 import OtpInput from "@bachdgvn/vue-otp-input";
 import Loading from 'vue-loading-overlay';
@@ -81,8 +79,6 @@ setupCalendar({
   componentPrefix: 'v'
 });
 
-Vue.component('calendar', Calendar)
-Vue.component('v-date-picker', DatePicker)
 Vue.component('vue-simple-context-menu', VueSimpleContextMenu)
 
 Vue.config.productionTip = process.env.NODE_ENV === 'production'
