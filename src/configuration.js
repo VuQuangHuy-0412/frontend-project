@@ -6,7 +6,7 @@ export default class Configuration {
   static get CONFIG() {
     // must have format $VUE_APP_XXX
     return {
-      sc5AdminURL: "http://34.30.230.33",
+      sc5AdminURL: "https://sc5.fptupay.tech/",
     };
   }
 
