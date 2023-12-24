@@ -29,23 +29,26 @@
               Xóa lọc
             </b-button>
           </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col md="4"><h5 style="padding-top: 50px">Ràng buộc tùy chỉnh</h5></b-col>
           <b-col md="8" class="text-right mt-30">
             <b-button
-                v-if="checkPermission('constraint_create')"
+                v-if="checkPermission('custom_constraint_create')"
                 variant="primary"
                 class="custom-btn-add-common"
                 style="background: orange; border: none"
-                @click="openModalCreateConstraintCompartment(null, false)"
+                @click="openModalCreateConstraintCompartment(null, false, 'custom')"
             >
               <font-awesome-icon :icon="['fas','plus']"/>
-              Thêm ràng buộc
+              Thêm ràng buộc tùy chỉnh
             </b-button>
           </b-col>
         </b-row>
 
         <b-table
             class="mt-3"
-            :items="constraints.data"
+            :items="constraints.customConstraints"
             :fields="visibleFields"
             :bordered="true"
             :hover="true"
@@ -59,7 +62,7 @@
             />
           </template>
           <template #cell(key)="row">
-            {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
+            {{ row.index + 1 }}
           </template>
           <template #cell(status)="row">
           <span v-if="row.item.status === 1">
@@ -69,25 +72,91 @@
             Không hoạt động
           </span>
           </template>
-<!--          <template #cell(content)="row">-->
-<!--            {{ concatGroupTeacher(row.item.groupTeacher) }}-->
-<!--          </template>-->
+          <template #cell(teacherConstraint)="row">
+            {{ concatTeacherConstraint(row.item.teacherColumnCompare, row.item.teacherCompare, row.item.teacherValueCompare) }}
+          </template>
+          <template #cell(classConstraint)="row">
+            {{ concatClassConstraint(row.item.classColumnCompare, row.item.classCompare, row.item.classValueCompare) }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
-                  v-if="userInfo && userInfo.permissions.indexOf('constraint_update') !== -1"
                   href="javascript:void(0)"
                   class="m-1"
                   type="button"
                   title="Cập nhật ràng buộc"
                   v-b-tooltip.hover
-                  @click.prevent="openModalCreateConstraintCompartment(row.item, true)">
+                  @click.prevent="openModalCreateConstraintCompartment(row.item, true, 'custom')">
                 <font-awesome-icon :icon="['fas', 'edit']"/>
               </a>
             </div>
           </template>
         </b-table>
-        <b-row v-if="constraints.data && constraints.data.length === 0"
+        <b-row v-if="constraints.customConstraints && constraints.customConstraints.length === 0"
+               class="justify-content-center">
+          <span>Không tìm thấy bản ghi nào</span>
+        </b-row>
+
+        <b-row class="mb-2">
+          <b-col md="4"><h5 style="padding-top: 50px">Ràng buộc bắt buộc</h5></b-col>
+          <b-col md="8" class="text-right mt-30">
+            <b-button
+                v-if="checkPermission('required_constraint_create')"
+                variant="primary"
+                class="custom-btn-add-common"
+                style="background: orange; border: none"
+                @click="openModalCreateConstraintCompartment(null, false, 'required')"
+            >
+              <font-awesome-icon :icon="['fas','plus']"/>
+              Thêm ràng buộc bắt buộc
+            </b-button>
+          </b-col>
+        </b-row>
+
+        <b-table
+            class="mt-3"
+            :items="constraints.requiredConstraints"
+            :fields="visibleFieldsRequired"
+            :bordered="true"
+            :hover="true"
+            :fixed="true"
+            :foot-clone="false"
+        >
+          <template #table-colgroup="scope">
+            <col
+                v-for="field in scope.visibleFields"
+                :key="field.key"
+            />
+          </template>
+          <template #cell(key)="row">
+            {{ row.index + 1 }}
+          </template>
+          <template #cell(status)="row">
+          <span v-if="row.item.status === 1">
+            Hoạt động
+          </span>
+            <span v-if="row.item.status === 0">
+            Không hoạt động
+          </span>
+          </template>
+          <!--          <template #cell(content)="row">-->
+          <!--            {{ concatGroupTeacher(row.item.groupTeacher) }}-->
+          <!--          </template>-->
+          <template #cell(actions)="row" style="text-align: center">
+            <div class="d-flex justify-content-center flex-wrap">
+              <a
+                  href="javascript:void(0)"
+                  class="m-1"
+                  type="button"
+                  title="Cập nhật ràng buộc"
+                  v-b-tooltip.hover
+                  @click.prevent="openModalCreateConstraintCompartment(row.item, true, 'required')">
+                <font-awesome-icon :icon="['fas', 'edit']"/>
+              </a>
+            </div>
+          </template>
+        </b-table>
+        <b-row v-if="constraints.requiredConstraints && constraints.requiredConstraints.length === 0"
                class="justify-content-center">
           <span>Không tìm thấy bản ghi nào</span>
         </b-row>
@@ -95,95 +164,106 @@
     </b-card>
 
     <b-modal
-        id="update-constraint"
-        :title="isUpdate ? 'Cập nhật thông tin ràng buộc' : 'Thêm mới ràng buộc'"
+        id="update-custom-constraint"
+        :title="isUpdate ? 'Cập nhật thông tin ràng buộc tùy chỉnh' : 'Thêm mới ràng buộc tùy chỉnh'"
         :no-close-on-backdrop="true"
         size="lg"
-        @hidden="closeModalCreateConstraintCompartment"
+        @hidden="closeModalCreateCustomConstraintCompartment"
     >
       <b-row>
         <b-col md="12">
           <b-form-group>
-            <label>Họ và tên<span class="text-danger">*</span>:</label>
-            <b-form-input
-                id="input-full-name"
-                v-model="$v.currentData.fullName.$model"
-                placeholder="Nhập họ và tên"
-                trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.fullName) }"
-            />
-            <div v-if="!$v.currentData.fullName.required" class="invalid-feedback">
-              Họ và tên không được để trống.
-            </div>
-          </b-form-group>
-        </b-col>
-        <b-col md="12">
-          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.rankAndDegree)}">
-            <label>Học hàm học vị<span class="text-danger">*</span>:</label>
+            <label>Giảng viên có:</label>
             <b-form-select
-                :options="optionsRankAndDegree.filter(rank => rank.value != null)"
+                :options="optionsTeacherColumnCompare"
                 :searchable="true"
                 value-field="value" text-field="text"
-                :class="{'is-invalid-option': validationStatus($v.currentData.rankAndDegree)}"
-                v-model.trim="currentData.rankAndDegree"
+                v-model.trim="currentData.teacherColumnCompare"
             >
             </b-form-select>
-            <div v-if="!$v.currentData.rankAndDegree.required" class="invalid-feedback">
-              Học hàm học vị không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Thời gian bắt đầu<span class="text-danger">*</span>:</label>
-            <div :class="{'invalid-date': validationStatus($v.currentData.startTime)}">
-              <date-picker
-                  class="w-100"
-                  :input-class="['form-control',{'is-invalid': validationStatus($v.currentData.startTime)}]"
-                  v-model.trim="$v.currentData.startTime.$model"
-                  type="date"
-                  format="DD/MM/YYYY"
-                  placeholder="Chọn ngày"
-                  :disabled-date="(date) => date >= new Date()"
-              >
-              </date-picker>
-              <div v-if="!$v.currentData.startTime.required" class="invalid-date-feedback">
-                Thời gian bắt đầu không được để trống.
-              </div>
-            </div>
+            <label>Điều kiện giảng viên:</label>
+            <b-form-select
+                :options="optionsTeacherCompare"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.teacherCompare"
+            >
+            </b-form-select>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Ngày sinh<span class="text-danger">*</span>:</label>
-            <div :class="{'invalid-date': validationStatus($v.currentData.birthday)}">
-              <date-picker
-                  class="w-100"
-                  :input-class="['form-control',{'is-invalid': validationStatus($v.currentData.birthday)}]"
-                  v-model.trim="$v.currentData.birthday.$model"
-                  type="date"
-                  format="DD/MM/YYYY"
-                  placeholder="Chọn ngày"
-                  :disabled-date="(date) => date >= new Date()"
-              >
-              </date-picker>
-              <div v-if="!$v.currentData.birthday.required" class="invalid-date-feedback">
-                Ngày sinh không được để trống.
-              </div>
-            </div>
+            <label>Giá trị:</label>
+            <b-form-input
+                id="input-teacher-value-compare"
+                v-model.trim="currentData.teacherValueCompare"
+                placeholder=""
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Lớp học có:</label>
+            <b-form-select
+                :options="optionsClassColumnCompare"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.classColumnCompare"
+            >
+            </b-form-select>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Điều kiện lớp học:</label>
+            <b-form-select
+                :options="optionsClassCompare"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.classCompare"
+            >
+            </b-form-select>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Giá trị:</label>
+            <b-form-input
+                id="input-class-value-compare"
+                v-model.trim="currentData.classValueCompare"
+                placeholder=""
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Trạng thái:</label>
+            <b-form-select
+                :options="optionsStatus.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.status"
+            >
+            </b-form-select>
           </b-form-group>
         </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
             class="mr-2 btn-light2 pull-right"
-            @click="closeModalCreateTeacherCompartment"
+            @click="closeModalCreateCustomConstraintCompartment"
         >
           Hủy
         </b-button>
         <b-button
             variant="primary pull-right"
-            @click.prevent="handleCreateTeacher"
+            @click.prevent="handleCreateCustomConstraint"
         >
           Đồng ý
         </b-button>
@@ -191,148 +271,150 @@
     </b-modal>
 
     <b-modal
-        id="modal-upload-teacher"
-        :modal-class="['sc5-modal']"
-        :header-class="['modal__header']"
+        id="update-required-constraint"
+        :title="isUpdate ? 'Cập nhật thông tin ràng buộc bắt buộc' : 'Thêm mới ràng buộc bắt buộc'"
         :no-close-on-backdrop="true"
         size="lg"
-        @hidden="closeModalUpload"
+        @hidden="closeModalCreateRequiredConstraintCompartment"
     >
-      <template slot="modal-header">
-        <div class="modal__header--item title font-weight-500">
-          Upload file ds giảng viên
-        </div>
-        <div class="modal__header--item close-btn px-2" @click="closeModalUpload">
-          <i class="fas fa-times"></i>
-        </div>
-      </template>
       <b-row>
-        <b-col md="2">
-          <div style="font-weight: bold">File mẫu</div>
+        <b-col md="12">
+          <b-form-group>
+            <label>Mã ràng buộc:</label>
+            <b-form-input
+                id="input-code"
+                v-model.trim="currentDataRequired.code"
+                placeholder=""
+                trim
+            />
+          </b-form-group>
         </b-col>
-        <b-col md="6">
-          <a
-              :href="SAMPLE_TEACHER_IMPORT_LINK"
-              target="_self"
-              style="font-weight: bold;color:black!important;"
-          >Format_ThemGV</a
-          >
+        <b-col md="12">
+          <b-form-group>
+            <label>Giá trị:</label>
+            <b-form-input
+                id="input-value"
+                v-model.trim="currentDataRequired.value"
+                placeholder=""
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Trạng thái:</label>
+            <b-form-select
+                :options="optionsStatus.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentData.status"
+            >
+            </b-form-select>
+          </b-form-group>
         </b-col>
       </b-row>
-      <b-row class="mt-3">
-        <b-col md="2">
-          <div style="font-weight: bold">File đã upload</div>
-        </b-col>
-        <b-col md="6">
-          <div style="font-weight: bold; color:black!important;" v-if="currentFile">
-            {{ currentFile.name }} <i @click="handleResetFile" class="fas fa-times"
-                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: rgb(128,128,128)"></i>
-          </div>
-        </b-col>
-      </b-row>
-      <div class="py-2">
-        <b-form-group v-if="userInfo" class="mt-2">
-          <i class="fas fa-upload custom-upload"></i>
-          <div class="mr-4">
-            <b-form-file
-                id="input-file"
-                ref="fileExcel"
-                multiple
-                type="file"
-                accept=".xls, .xlsx"
-                placeholder="Kéo thả file hoặc"
-                browse-text="Chọn file"
-                @change="handleFilesUpload"
-            ></b-form-file>
-          </div>
-        </b-form-group>
-        <div style="width: 100%; text-align: center">
-          <b-button :disabled="!currentFile || loadingFile" variant="primary" class="py-2"
-                    style="margin-top: 90px;z-index: 1000;width: 200px" @click.prevent="handleUploadDataExcel">
-            <span v-if="!loadingFile"
-            > Xác nhận</span>
-            <i v-if="loadingFile" class="fa fa-spinner fa-spin mr-2"/>
-          </b-button>
-        </div>
-      </div>
+      <template #modal-footer>
+        <b-button
+            class="mr-2 btn-light2 pull-right"
+            @click="closeModalCreateRequiredConstraintCompartment"
+        >
+          Hủy
+        </b-button>
+        <b-button
+            variant="primary pull-right"
+            @click.prevent="handleCreateRequiredConstraint"
+        >
+          Đồng ý
+        </b-button>
+      </template>
     </b-modal>
+
   </b-form>
 </template>
 <script>
 import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
 import {
-  ALL_GROUP_TEACHER,
-  CREATE_TEACHER,
-  FETCH_TEACHERS,
-  UPDATE_TEACHER
+  FETCH_CONSTRAINTS,
+  CREATE_CUSTOM_CONSTRAINT,
+  UPDATE_CUSTOM_CONSTRAINT,
+  CREATE_REQUIRED_CONSTRAINT,
+  UPDATE_REQUIRED_CONSTRAINT
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatDate2, formatTime} from "@/common/utils";
-import {PAGINATION_OPTIONS, SAMPLE_TEACHER_IMPORT_LINK} from "@/common/config"
+import {checkPermission} from "@/common/utils";
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
-import moment from 'moment-timezone';
-import {required} from "vuelidate/lib/validators";
-import * as XLSX from "xlsx";
-import {SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
-import MultiSelect from 'primevue/multiselect';
 
 const initData = {
-  id: null,
-  fullName: null,
-  rankAndDegree: null,
-  groupTeacher: null,
-  startTimeFrom: null,
-  startTimeTo: null,
-  page: 1,
-  pageSize: 20
+  status: null,
 }
 
-const initTeacher = {
+const initCustomConstraint = {
   id: null,
-  fullName: null,
-  rankAndDegree: null,
-  startTime: null,
-  birthday: null,
-  groupTeacher: null,
+  teacherCompare: null,
+  teacherColumnCompare: null,
+  teacherValueCompare: null,
+  classCompare: null,
+  classColumnCompare: null,
+  classValueCompare: null,
+  status: null,
 }
 
-const initNewDataExcel = {
-  fullName: null,
-  rankAndDegree: null,
-  startTime: null,
-  birthday: null,
-};
+const initRequiredConstraint = {
+  id: null,
+  code: null,
+  value: null,
+  status: null,
+}
 
 export default {
-  name: "Teachers",
-  components: {PageTitle, DatePicker, MultiSelect},
+  name: "Constraints",
+  components: {PageTitle, DatePicker},
   mixins: [baseMixins],
   data() {
     return {
       loadingFile: false,
-      startTimeFrom: new Date(),
-      startTimeTo: new Date(),
-      totalRow: 0,
-      PAGINATION_OPTIONS,
-      SAMPLE_TEACHER_IMPORT_LINK,
-      subheading: "Quản lý danh sách giảng viên.",
+      subheading: "Quản lý danh sách ràng buộc.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
-      heading: "Danh sách giảng viên",
+      heading: "Danh sách ràng buộc",
       loadingHeader: true,
       dataFilter: Object.assign({}, {
         ...initData,
       }),
-      selectedPageSize: {text: initData.pageSize},
-      selectedRankAndDegree: {value: null, text: 'Tất cả'},
-      optionsRankAndDegree: [
+      selectedStatus: {value: null, text: 'Tất cả'},
+      optionsStatus: [
         {value: null, text: 'Tất cả'},
-        {value: 'GV', text: 'Giảng viên'},
-        {value: 'TS', text: 'Tiến sĩ'},
-        {value: 'ThS', text: 'Thạc sĩ'},
-        {value: 'GS', text: 'Giáo sư'},
-        {value: 'PGS', text: 'Phó giáo sư'},
+        {value: 0, text: 'Không hoạt động'},
+        {value: 1, text: 'Hoạt động'},
+      ],
+      selectedTeacherColumnCompare: null,
+      optionsTeacherColumnCompare: [
+        {value: 'id', text: 'Id'},
+        {value: 'rank_and_degree', text: 'Học hàm, học vị'},
+        {value: 'rating', text: 'Rating'},
+      ],
+      selectedTeacherCompare: null,
+      optionsTeacherCompare: [
+        {value: '=', text: 'Bằng'},
+        {value: '>', text: 'Lớn hơn'},
+        {value: '<', text: 'Nhỏ hơn'},
+        {value: '>=', text: 'Lớn hơn hoặc bằng'},
+        {value: '<=', text: 'Nhỏ hơn hoặc bằng'},
+        {value: '!=', text: 'Khác'},
+      ],
+      selectedClassColumnCompare: null,
+      optionsClassColumnCompare: [
+        {value: 'id', text: 'Id'},
+      ],
+      selectedClassCompare: null,
+      optionsClassCompare: [
+        {value: '=', text: 'Bằng'},
+        {value: '>', text: 'Lớn hơn'},
+        {value: '<', text: 'Nhỏ hơn'},
+        {value: '>=', text: 'Lớn hơn hoặc bằng'},
+        {value: '<=', text: 'Nhỏ hơn hoặc bằng'},
+        {value: '!=', text: 'Khác'},
       ],
       fields: [
         {
@@ -351,37 +433,9 @@ export default {
           visible: true,
           thStyle: {width: '3%'}
         },
-        {key: "fullName", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
-        {key: "rankAndDegree", label: "Học hàm học vị", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "groupTeacher", label: "Nhóm chuyên môn", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {
-          key: "startTime",
-          label: "Thời gian bắt đầu",
-          formatter: (value) => {
-            if (value) {
-              let startTime = new Date(value);
-              return formatDate2(startTime);
-            }
-            return "";
-          },
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {
-          key: "birthday",
-          label: "Ngày sinh",
-          formatter: (value) => {
-            if (value) {
-              let birthday = new Date(value);
-              return moment(birthday).format("DD/MM/YYYY");
-            }
-            return "";
-          },
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
+        {key: "teacherConstraint", label: "Điều kiện giảng viên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
+        {key: "classConstraint", label: "Điều kiện lớp học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "status", label: "Trạng thái", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "actions",
           label: "Chức năng",
@@ -390,360 +444,239 @@ export default {
           thClass: 'align-middle'
         }
       ],
-      datePickerConfig: {
-        placeholder1: "Chọn",
-        inputClass: "form-control",
-      },
-      requestTimeFilter: null,
-      actionType: null,
+      fieldsRequired: [
+        {
+          key: "key",
+          label: "STT",
+          tdClass: 'align-middle',
+          thClass: 'align-middle',
+          visible: true,
+          thStyle: {width: '3%'}
+        },
+        {
+          key: "id",
+          label: "ID",
+          tdClass: 'align-middle',
+          thClass: 'align-middle',
+          visible: true,
+          thStyle: {width: '3%'}
+        },
+        {key: "code", label: "Mã ràng buộc", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
+        {key: "value", label: "Nội dung ràng buộc", visible: true, thStyle: "width: 12%", thClass: 'align-middle'},
+        {key: "status", label: "Trạng thái", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {
+          key: "actions",
+          label: "Chức năng",
+          visible: true,
+          thStyle: "width: 6%",
+          thClass: 'align-middle'
+        }
+      ],
       userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null,
-      currentData: Object.assign({}, {...initTeacher}),
+      currentData: Object.assign({}, {...initCustomConstraint}),
+      currentDataRequired: Object.assign({}, {...initRequiredConstraint}),
       currentDetail: null,
-      currentFile: null,
       isUpdate: false,
-      uploadDataExcel: [],
-      dataExcel: [],
-      selectedGroupTeacher: { value: null, text: "Tất cả" },
     }
   },
   validations: {
-    currentData: {
-      fullName: {required},
-      rankAndDegree: {required},
-      startTime: {required},
-      birthday: {required},
-    },
   },
   mounted() {
-    Promise.all([
-        this.fetchAllGroupTeachers()
-    ]).then(() => {
-      const dataSearch = this.$route.query.dataSearch;
+    const dataSearch = this.$route.query.dataSearch;
 
-      if (dataSearch) {
-        this.dataFilter = JSON.parse(String(dataSearch));
+    if (dataSearch) {
+      this.dataFilter = JSON.parse(String(dataSearch));
+    }
+    this.handleDataFilter();
 
-        this.selectedRankAndDegree = this.optionsRankAndDegree.filter((i) => i.value === this.dataFilter.rankAndDegree)[0];
-        this.selectedGroupTeacher = this.optionsGroupTeacher.filter(
-            (i) => i.value === this.dataFilter.groupTeacher
-        )[0];
-        this.startTimeFrom = this.dataFilter.startTimeFrom && new Date(this.dataFilter.startTimeFrom);
-        this.startTimeTo = this.dataFilter.startTimeTo && new Date(moment(this.dataFilter.startTimeTo).subtract(1, 'day'));
-
-        this.selectedPageSize = {text: this.dataFilter.pageSize}
-      }
-      this.handleDataFilter();
-
-      this.fetchTeachers();
-    })
+    this.fetchConstraints();
   },
   watch: {},
   computed: {
-    ...mapGetters(["teachers", "allGroupTeachers"]),
+    ...mapGetters(["constraints"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
     },
+    visibleFieldsRequired() {
+      return this.fieldsRequired.filter((field) => field.visible);
+    },
     validation() {
     },
-    optionsGroupTeacher() {
-      return this.formatOptionsGroupTeacher(this.allGroupTeachers);
-    }
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.startTimeFrom = this.startTimeFrom && formatTime(this.startTimeFrom, 'START');
-      this.dataFilter.startTimeTo = this.startTimeTo && formatTime(this.startTimeTo, 'END');
-      this.dataFilter.id = this.id !== '' ? this.dataFilter.id : null;
-      this.dataFilter.fullName = this.fullName !== '' ? this.dataFilter.fullName : null;
-      this.dataFilter.rankAndDegree = this.selectedRankAndDegree === null ? null : this.selectedRankAndDegree.value;
-      this.dataFilter.page = 1;
-      this.dataFilter.pageSize = this.selectedPageSize.text
-      this.dataFilter.groupTeacher = this.selectedGroupTeacher == null ? null : this.selectedGroupTeacher.value;
+      this.dataFilter.status = this.selectedStatus === null ? null : this.selectedStatus.value;
     },
     reload() {
-      this.fetchTeachers();
+      this.fetchConstraints();
     },
     checkPermission,
-    async fetchTeachers() {
-      let res = await this.$store.dispatch(FETCH_TEACHERS, this.dataFilter)
-      if (res && res.length > 0 && res.length === this.dataFilter.pageSize) {
-        this.totalRow = 1000000000;
-      } else {
-        this.totalRow = this.dataFilter.page * this.dataFilter.pageSize
-      }
+    async fetchConstraints() {
+      let res = await this.$store.dispatch(FETCH_CONSTRAINTS, this.dataFilter)
       setTimeout(() => {
         if (this.loadingHeader) this.loadingHeader = !this.loadingHeader
       }, 200);
     },
-    changePagination(e) {
-      this.dataFilter.pageSize = e.text;
-    },
-    changePage(e) {
-      this.dataFilter.page = e
-      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchTeachers();
-    },
-    changePageSize(e) {
-      if (e) {
-        this.dataFilter.pageSize = e.text
-        this.dataFilter.page = 1
-      }
-      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchTeachers();
-    },
     handleSearch(event) {
       event.preventDefault();
       this.handleDataFilter();
-      router.push({path: '/admin/teachers', query: {dataSearch: JSON.stringify(this.dataFilter)}})
-      this.fetchTeachers();
+      router.push({path: '/admin/constraints', query: {dataSearch: JSON.stringify(this.dataFilter)}})
+      this.fetchConstraints();
     },
     handleReset() {
-      this.$router.replace('/admin/teachers')
+      this.$router.replace('/admin/constraints')
       this.dataFilter = Object.assign({}, {
         ...initData,
-        pageSize: this.dataFilter.pageSize,
-        startTimeFrom: new Date(),
-        startTimeTo: new Date(),
       });
-      this.startTimeFrom = new Date();
-      this.startTimeTo = new Date();
-      this.fullName = '';
-      this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
-      this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
-      this.id = '';
+      this.selectedStatus = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
-      this.fetchTeachers();
+      this.fetchConstraints();
     },
-    openModalCreateTeacherCompartment(teacher, isUpdate) {
-      this.isUpdate = isUpdate
+    openModalCreateConstraintCompartment(constraint, isUpdate, type) {
+      if (type === 'custom') {
+        this.isUpdate = isUpdate
 
-      if (isUpdate) {
-        this.currentData = Object.assign({}, {
-          ...teacher,
-          startTime: new Date(teacher.startTime),
-          birthday: new Date(teacher.birthday),
-        });
+        if (isUpdate) {
+          this.currentData = Object.assign({}, {
+            ...constraint,
+          });
+        } else {
+          this.currentData = Object.assign({}, {
+            ...initCustomConstraint,
+            status: 1,
+          });
+        }
+        this.$root.$emit("bv::show::modal", 'update-custom-constraint');
       } else {
-        this.currentData = Object.assign({}, {
-          ...initTeacher,
-          rankAndDegree: 'GV',
-          startTime: new Date(),
-          birthday: new Date(),
-        });
+        this.isUpdate = isUpdate
+
+        if (isUpdate) {
+          this.currentDataRequired = Object.assign({}, {
+            ...constraint,
+          });
+        } else {
+          this.currentDataRequired = Object.assign({}, {
+            ...initRequiredConstraint,
+            status: 1,
+          });
+        }
+        this.$root.$emit("bv::show::modal", 'update-required-constraint');
       }
-      this.$root.$emit("bv::show::modal", 'update-teacher');
     },
-    closeModalCreateTeacherCompartment() {
-      this.currentData = Object.assign({}, {...initTeacher})
+    closeModalCreateCustomConstraintCompartment() {
+      this.currentData = Object.assign({}, {...initCustomConstraint})
       this.$nextTick(() => {
         this.$v.currentData.$reset();
       });
-      this.$root.$emit("bv::hide::modal", 'update-teacher')
+      this.$root.$emit("bv::hide::modal", 'update-custom-constraint')
+    },
+    closeModalCreateRequiredConstraintCompartment() {
+      this.currentDataRequired = Object.assign({}, {...initRequiredConstraint})
+      this.$nextTick(() => {
+        this.$v.currentDataRequired.$reset();
+      });
+      this.$root.$emit("bv::hide::modal", 'update-required-constraint')
     },
     validationStatus: function (validation) {
       return typeof validation != "undefined" ? validation.$error : false;
     },
-    async handleCreateTeacher() {
+    async handleCreateCustomConstraint() {
       this.$v.$reset();
       this.$v.$touch();
 
-      if (this.$v.currentData.$invalid) return
       const payload = {
         id: this.isUpdate ? this.currentData.id : null,
-        fullName: this.currentData.fullName,
-        rankAndDegree: this.currentData.rankAndDegree,
-        startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        teacherCompare: this.currentData.teacherCompare,
+        teacherColumnCompare: this.currentData.teacherColumnCompare,
+        teacherValueCompare: this.currentData.teacherValueCompare,
+        classCompare: this.currentData.classCompare,
+        classColumnCompare: this.currentData.classColumnCompare,
+        classValueCompare: this.currentData.classValueCompare,
+        status: this.currentData.status,
       }
 
       if (this.isUpdate) {
-        const res = await this.$store.dispatch(UPDATE_TEACHER, payload)
+        const res = await this.$store.dispatch(UPDATE_CUSTOM_CONSTRAINT, payload)
         if (res && res.status === 200) {
           clearTimeout(this.handleDelay)
           this.handleDelay = setTimeout(() => {
             this.$message({
-              message: 'Cập nhật thông tin giảng viên thành công',
+              message: 'Cập nhật thông tin ràng buộc thành công',
               type: "success",
               showClose: true,
             });
-            this.closeModalCreateTeacherCompartment()
-            this.fetchTeachers()
+            this.closeModalCreateCustomConstraintCompartment()
+            this.fetchConstraints()
           }, 1000)
         }
       } else {
-        const res = await this.$store.dispatch(CREATE_TEACHER, payload)
+        const res = await this.$store.dispatch(CREATE_CUSTOM_CONSTRAINT, payload)
         if (res && res.status === 200) {
           clearTimeout(this.handleDelay)
           this.handleDelay = setTimeout(() => {
             this.$message({
-              message: 'Thêm mới giảng viên thành công',
+              message: 'Thêm mới ràng buộc thành công',
               type: "success",
               showClose: true,
             });
-            this.closeModalCreateTeacherCompartment()
-            this.fetchTeachers()
+            this.closeModalCreateCustomConstraintCompartment()
+            this.fetchConstraints()
           }, 1000)
         }
       }
     },
-    openModalUploadTeacher() {
-      this.$root.$emit("bv::show::modal", 'modal-upload-teacher')
-    },
-    closeModalUpload() {
-      this.currentDetail = null
-      this.currentFile = null
-      this.$root.$emit("bv::hide::modal", 'modal-upload-teacher')
-    },
-    handleResetFile() {
-      this.uploadDataExcel = []
-      this.dataExcel = []
-      this.currentFile = null
-      this.$nextTick(() => {
-        this.$refs.fileExcel.reset();
-      })
-    },
-    handleFilesUpload(event) {
-      this.dataExcel = [];
-      this.uploadDataExcel = [];
-      this.currentFile = null;
-      let uploadedFiles = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
-      if (!uploadedFiles) return;
+    async handleCreateRequiredConstraint() {
+      this.$v.$reset();
+      this.$v.$touch();
 
-      this.currentFile = uploadedFiles;
-      let reader = new FileReader();
-      reader.onload = (e) => {
-        const target = reader.result;
-        const wb = XLSX.read(target, {type: "array", cellDates: true});
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false});
-        this.handleFormatJSONFromExcel(data);
-      };
-      reader.readAsArrayBuffer(uploadedFiles);
-    },
-    handleFormatJSONFromExcel(json) {
-      if (!json || json.length <= 1) return;
+      const payload = {
+        id: this.isUpdate ? this.currentDataRequired.id : null,
+        code: this.currentDataRequired.code,
+        value: this.currentDataRequired.value,
+        status: this.currentData.status,
+      }
 
-      this.dataExcel = json
-          .filter((item, index) => index !== 0)
-          .map((item, index) => {
-            let teacher = Object.assign({});
-
-            item.forEach((itemValue, indexValue) => {
-              if (json[0][indexValue]) {
-                let newAttribute = '';
-                switch (json[0][indexValue]) {
-                  case 'Họ và tên':
-                    newAttribute = 'fullName';
-                    break;
-                  case 'Học hàm học vị':
-                    newAttribute = 'rankAndDegree';
-                    break;
-                  case 'Ngày bắt đầu':
-                    newAttribute = 'startTime';
-                    break;
-                  case 'Ngày sinh':
-                    newAttribute = 'birthday';
-                    break;
-                  default:
-                    break;
-                }
-                teacher[newAttribute] = itemValue;
-              }
+      if (this.isUpdate) {
+        const res = await this.$store.dispatch(UPDATE_REQUIRED_CONSTRAINT, payload)
+        if (res && res.status === 200) {
+          clearTimeout(this.handleDelay)
+          this.handleDelay = setTimeout(() => {
+            this.$message({
+              message: 'Cập nhật thông tin ràng buộc thành công',
+              type: "success",
+              showClose: true,
             });
-
-            return teacher;
-          });
-    },
-    async handleUploadDataExcel() {
-      if (!this.dataExcel || this.dataExcel.length === 0) {
-        this.$message({
-          message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
-          type: "warning",
-          showClose: true,
-        });
-        return
-      }
-      if (!this.dataExcel || this.dataExcel.length === 0) return null
-
-      this.dataExcel.forEach(item => {
-        let newData = Object.assign({}, {...initNewDataExcel})
-        newData.fullName = item.fullName ? item.fullName : null;
-        newData.rankAndDegree = item.rankAndDegree ? item.rankAndDegree : null;
-        newData.startTime = item.startTime ? item.startTime : null
-        newData.birthday = item.birthday ? item.birthday : null
-
-        this.uploadDataExcel.push({...newData})
-      });
-
-      this.loadingFile = true;
-      const dataFiltered = this.uploadDataExcel.filter((item) => {
-        return item.fullName !== null;
-      });
-
-      let res = await this.post('/teacher/upload-excel', {
-        teacherCreateRequests: dataFiltered
-      });
-      setTimeout(() => {
-        this.loadingFile = false;
-      }, 300);
-
-      if (res.status === 200) {
-        this.$message({
-          message: 'Tải dữ liệu lên thành công.',
-          type: "success",
-          showClose: true,
-        });
-
-        this.uploadDataExcel = []
-        this.dataExcel = []
-        this.currentFile = null
-        this.$nextTick(() => {
-          this.$refs.fileExcel.reset();
-        })
-
-        setTimeout(() => {
-          this.closeModalUpload();
-          this.fetchTeachers();
-        }, 1000);
-      }
-    },
-    formatOptionsGroupTeacher(groupTeachers) {
-      if (!groupTeachers) return []
-      let options = groupTeachers.map((item) => {
-        return {text: item.name, value: item.id}
-      })
-
-      let result = [{text: "Tất cả", value: null}]
-      result.push({...options[0]})
-      options.forEach(item => {
-        if (result && result.length > 0) {
-          if (result.map(child => child.value).indexOf(item.value) === -1) result.push(item)
+            this.closeModalCreateRequiredConstraintCompartment()
+            this.fetchConstraints()
+          }, 1000)
         }
-      })
-
-      return result;
-    },
-    async fetchAllGroupTeachers() {
-      let response = await this.$store.dispatch(ALL_GROUP_TEACHER);
-
-      if (response && response.data) {
-        this.$store.commit(SET_ALL_GROUP_TEACHERS, response.data);
+      } else {
+        const res = await this.$store.dispatch(CREATE_REQUIRED_CONSTRAINT, payload)
+        if (res && res.status === 200) {
+          clearTimeout(this.handleDelay)
+          this.handleDelay = setTimeout(() => {
+            this.$message({
+              message: 'Thêm mới ràng buộc thành công',
+              type: "success",
+              showClose: true,
+            });
+            this.closeModalCreateRequiredConstraintCompartment()
+            this.fetchConstraints()
+          }, 1000)
+        }
       }
     },
-    concatGroupTeacher(groupTeacher) {
-      if (groupTeacher === null || groupTeacher.length <= 0) {
-        return "";
+    concatTeacherConstraint(column, compare, value) {
+      if (column && compare && value) {
+        return column + " " + compare + " " + value;
       }
-
-      let groupTeacherText = "";
-      groupTeacher.forEach((item, index) => {
-        if (index !== groupTeacher.length - 1)
-          groupTeacherText += item.name + ", ";
-        else
-          groupTeacherText += item.name;
-      })
-      return groupTeacherText;
+      return "";
+    },
+    concatClassConstraint(column, compare, value) {
+      if (column && compare && value) {
+        return column + " " + compare + " " + value;
+      }
+      return "";
     }
   }
 }

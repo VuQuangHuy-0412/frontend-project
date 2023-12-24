@@ -173,7 +173,7 @@
                 hide-goto-end-buttons
                 v-model="dataFilter.page"
                 :per-page="dataFilter.pageSize"
-                :total-rows="100000000"
+                :total-rows="totalRow"
                 @change="changePage"
             ></b-pagination>
             <multiselect v-model="selectedPageSize" track-by="text" label="text" :show-labels="false"
@@ -647,7 +647,7 @@ export default {
     checkPermission,
     async fetchTeachers() {
       let res = await this.$store.dispatch(FETCH_TEACHERS, this.dataFilter)
-      if (res && res.length > 0 && res.length === this.dataFilter.pageSize) {
+      if (res && res.data.length > 0 && res.data.length === this.dataFilter.pageSize) {
         this.totalRow = 1000000000;
       } else {
         this.totalRow = this.dataFilter.page * this.dataFilter.pageSize

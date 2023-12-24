@@ -1,7 +1,6 @@
 import {
-    CREATE_CONSTRAINT,
-    FETCH_CONSTRAINTS,
-    UPDATE_CONSTRAINT,
+    CREATE_CUSTOM_CONSTRAINT, CREATE_REQUIRED_CONSTRAINT,
+    FETCH_CONSTRAINTS, UPDATE_CUSTOM_CONSTRAINT, UPDATE_REQUIRED_CONSTRAINT,
 } from "./action.type";
 import { SUCCESS } from "@/common/config"
 import baseMixins from "../components/mixins/base"
@@ -35,15 +34,27 @@ const actions = {
             }
         })
     },
-    [CREATE_CONSTRAINT](context, payload) {
+    [CREATE_CUSTOM_CONSTRAINT](context, payload) {
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.post('/constraint/create', payload)
+            let response = await baseMixins.methods.post('/constraint/custom/create', payload)
             resolve(response)
         })
     },
-    [UPDATE_CONSTRAINT](context, payload) {
+    [UPDATE_CUSTOM_CONSTRAINT](context, payload) {
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.post('/constraint/update', payload)
+            let response = await baseMixins.methods.post('/constraint/custom/update', payload)
+            resolve(response)
+        })
+    },
+    [CREATE_REQUIRED_CONSTRAINT](context, payload) {
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.post('/constraint/required/create', payload)
+            resolve(response)
+        })
+    },
+    [UPDATE_REQUIRED_CONSTRAINT](context, payload) {
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.post('/constraint/required/update', payload)
             resolve(response)
         })
     },
