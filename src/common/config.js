@@ -34,12 +34,12 @@ export const PAGINATION_OPTIONS = [
   { text: 50 },
   { text: 100 }
 ];
-export const SAMPLE_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/8b8e37136d10bcf46e1ed8eea81426af.xlsx';
-export const SAMPLE_GROUP_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
-export const SAMPLE_CLASS_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
-export const SAMPLE_STUDENT_PROJECT_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
-export const SAMPLE_SUBJECT_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
-export const SAMPLE_GROUP_TEACHER_MAPPING_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/1724eaabb2a4faab9bf16e52a63c475c.xlsx';
+export const SAMPLE_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/440f5c05d76bebfb6d752571c21a2f21.xlsx';
+export const SAMPLE_GROUP_TEACHER_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/01adf13abeb8bcd174318488d28ae7d7.xlsx';
+export const SAMPLE_CLASS_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/01adf13abeb8bcd174318488d28ae7d7.xlsx';
+export const SAMPLE_STUDENT_PROJECT_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/b150d84c6a9562f3c85f45baac9b4282.xlsx';
+export const SAMPLE_SUBJECT_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/26ee8238ba4d3a068c188e616f511e41.xlsx';
+export const SAMPLE_GROUP_TEACHER_MAPPING_IMPORT_LINK = 'https://cache.giaohangtietkiem.vn/d/924553ec6452798701c2338d82eac346.xlsx';
 
 
 
