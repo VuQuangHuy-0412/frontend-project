@@ -398,7 +398,7 @@ export default {
     checkPermission,
     async fetchGroupTeachers() {
       let res = await this.$store.dispatch(FETCH_GROUP_TEACHERS, this.dataFilter)
-      if (res && res.length > 0 && res.length === this.dataFilter.pageSize) {
+      if (res && res.data.length > 0 && res.data.length === this.dataFilter.pageSize) {
         this.totalRow = 1000000000;
       } else {
         this.totalRow = this.dataFilter.page * this.dataFilter.pageSize

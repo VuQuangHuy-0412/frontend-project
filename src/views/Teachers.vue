@@ -173,7 +173,7 @@
                 hide-goto-end-buttons
                 v-model="dataFilter.page"
                 :per-page="dataFilter.pageSize"
-                :total-rows="totalRow"
+                :total-rows="100000000"
                 @change="changePage"
             ></b-pagination>
             <multiselect v-model="selectedPageSize" track-by="text" label="text" :show-labels="false"
