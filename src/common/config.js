@@ -1,7 +1,6 @@
 export default {}
 
 //apiUrlUpload,
-var apiUrl;
 
 export const ENV = 'local';
 export const ENV_LOCAL = 'local';
@@ -9,7 +8,6 @@ export const ENV_LOCAL = 'local';
 // if (location.hostname === "localhost") {
 //   apiUrl = 'http://localhost:8084';
 // } else {
-  apiUrl = 'https://localhost:8084';
   // apiUrl = 'http://172.16.50.74:8084';
 // }
 // if (ENV == 'product') {
@@ -20,7 +18,6 @@ export const ENV_LOCAL = 'local';
 //   apiUrl = "http://localhost:8086"
 // }
 
-export const API_URL = apiUrl;
 
 export const SUCCESS = 200;
 
