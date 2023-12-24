@@ -83,6 +83,24 @@ const router = new Router({
       component: () => import("@/views/Constraints"),
       meta: { title: 'Quản lý ràng buộc', layout: 'default' }
     },
+    {
+      path: '/admin/timetabling/teacher',
+      name: 'TimetablingTeacher',
+      component: () => import("@/views/TimetablingTeacher"),
+      meta: { title: 'Phân công giảng dạy', layout: 'default' }
+    },
+    {
+      path: '/admin/timetabling/student',
+      name: 'TimetablingStudent',
+      component: () => import("@/views/TimetablingStudent"),
+      meta: { title: 'Phân công hướng dẫn', layout: 'default' }
+    },
+    {
+      path: '/admin/export',
+      name: 'Export',
+      component: () => import("@/views/Export"),
+      meta: { title: 'Xuất dữ liệu phân công', layout: 'default' }
+    },
   ]
 });
 router.beforeEach((to, from, next) => {

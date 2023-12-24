@@ -115,9 +115,14 @@ export default {
           icon: 'fa fa-wallet',
           child: [
             {
-              href: "/admin/constraints",
-              title: "Danh sách ràng buộc",
-              permission: 'constraint_search'
+              href: "/admin/timetabling/teacher",
+              title: "Phân công giảng dạy",
+              permission: 'timetabling_teacher'
+            },
+            {
+              href: "/admin/timetabling/student",
+              title: "Phân công hướng dẫn",
+              permission: 'timetabling_student'
             }
           ],
         },
@@ -126,9 +131,9 @@ export default {
           icon: 'fa fa-wallet',
           child: [
             {
-              href: "/admin/constraints",
-              title: "Danh sách ràng buộc",
-              permission: 'constraint_search'
+              href: "/admin/export",
+              title: "Xuất dữ liệu phân công",
+              permission: 'export_timetabling'
             }
           ],
         },
