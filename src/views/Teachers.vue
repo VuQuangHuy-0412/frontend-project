@@ -35,6 +35,13 @@
             </multiselect>
           </b-col>
           <b-col md="2">
+            <div class="label-form">Trạng thái</div>
+            <multiselect v-model="selectedStatus" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsStatus" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+          <b-col md="2">
             <div class="label-form">Thời gian bắt đầu từ</div>
             <date-picker
                 :disabled-date="(date) => date >= new Date()"
@@ -58,6 +65,8 @@
                 placeholder="Chọn"
             />
           </b-col>
+        </b-row>
+        <b-row class="mb-2">
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
@@ -123,6 +132,14 @@
           </span>
             <span v-if="row.item.rankAndDegree === 'PGS'">
             Phó Giáo sư
+          </span>
+          </template>
+          <template #cell(status)="row">
+          <span v-if="row.item.status === 0">
+            Không hoạt động
+          </span>
+            <span v-if="row.item.status === 'ThS'">
+            Hoạt động
           </span>
           </template>
           <template #cell(groupTeacher)="row">
@@ -296,6 +313,22 @@
             </div>
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.status)}">
+            <label>Trạng thái<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsStatus.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.status)}"
+                v-model.trim="currentData.status"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.status.required" class="invalid-feedback">
+              Trạng thái không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -315,7 +348,7 @@
 
     <b-modal
         id="modal-upload-teacher"
-        :modal-class="['ghtk-modal']"
+        :modal-class="['sc5-modal']"
         :header-class="['modal__header']"
         :no-close-on-backdrop="true"
         size="lg"
@@ -405,6 +438,7 @@ const initData = {
   id: null,
   fullName: null,
   rankAndDegree: null,
+  status: null,
   groupTeacher: null,
   startTimeFrom: null,
   startTimeTo: null,
@@ -421,7 +455,8 @@ const initTeacher = {
   groupTeacher: null,
   gdTime: null,
   hdTime: null,
-  rating: null
+  rating: null,
+  status: null
 }
 
 const initNewDataExcel = {
@@ -431,7 +466,8 @@ const initNewDataExcel = {
   birthday: null,
   gdTime: null,
   hdTime: null,
-  rating: null
+  rating: null,
+  status: null
 };
 
 export default {
@@ -441,7 +477,7 @@ export default {
   data() {
     return {
       loadingFile: false,
-      startTimeFrom: new Date(),
+      startTimeFrom: null,
       startTimeTo: new Date(),
       totalRow: 0,
       PAGINATION_OPTIONS,
@@ -455,6 +491,12 @@ export default {
       }),
       selectedPageSize: {text: initData.pageSize},
       selectedRankAndDegree: {value: null, text: 'Tất cả'},
+      selectedStatus: {value: null, text: 'Tất cả'},
+      optionsStatus: [
+        {value: null, text: 'Tất cả'},
+        {value: 0, text: 'Không hoạt động'},
+        {value: 1, text: 'Hoạt động'},
+      ],
       optionsRankAndDegree: [
         {value: null, text: 'Tất cả'},
         {value: 'GV', text: 'Giảng viên'},
@@ -514,6 +556,7 @@ export default {
           thStyle: "width: 6%",
           thClass: 'align-middle'
         },
+        {key: "status", label: "Trạng thái", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "actions",
           label: "Chức năng",
@@ -547,6 +590,7 @@ export default {
       gdTime: {required},
       hdTime: {required},
       rating: {required},
+      status: {required}
     },
   },
   mounted() {
@@ -559,6 +603,7 @@ export default {
         this.dataFilter = JSON.parse(String(dataSearch));
 
         this.selectedRankAndDegree = this.optionsRankAndDegree.filter((i) => i.value === this.dataFilter.rankAndDegree)[0];
+        this.selectedStatus = this.optionsStatus.filter((i) => i.value === this.dataFilter.status)[0];
         this.selectedGroupTeacher = this.optionsGroupTeacher.filter(
             (i) => i.value === this.dataFilter.groupTeacher
         )[0];
@@ -591,6 +636,7 @@ export default {
       this.dataFilter.id = this.id !== '' ? this.dataFilter.id : null;
       this.dataFilter.fullName = this.fullName !== '' ? this.dataFilter.fullName : null;
       this.dataFilter.rankAndDegree = this.selectedRankAndDegree === null ? null : this.selectedRankAndDegree.value;
+      this.dataFilter.status = this.status === null ? null : this.selectedStatus.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
       this.dataFilter.groupTeacher = this.selectedGroupTeacher == null ? null : this.selectedGroupTeacher.value;
@@ -637,13 +683,14 @@ export default {
       this.dataFilter = Object.assign({}, {
         ...initData,
         pageSize: this.dataFilter.pageSize,
-        startTimeFrom: new Date(),
         startTimeTo: new Date(),
+        startTimeFrom: null,
       });
-      this.startTimeFrom = new Date();
       this.startTimeTo = new Date();
+      this.startTimeFrom = null;
       this.fullName = '';
       this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
+      this.selectedStatus = {value: null, text: 'Tất cả'};
       this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
       this.id = '';
       this.handleDataFilter();
@@ -662,6 +709,7 @@ export default {
         this.currentData = Object.assign({}, {
           ...initTeacher,
           rankAndDegree: 'GV',
+          status: 0,
           startTime: new Date(),
           birthday: new Date(),
         });
@@ -687,6 +735,7 @@ export default {
         id: this.isUpdate ? this.currentData.id : null,
         fullName: this.currentData.fullName,
         rankAndDegree: this.currentData.rankAndDegree,
+        status: this.currentData.status,
         gdTime: this.currentData.gdTime,
         hdTime: this.currentData.hdTime,
         rating: this.currentData.rating,
@@ -792,6 +841,9 @@ export default {
                   case 'Rating':
                     newAttribute = 'rating';
                     break;
+                  case 'Trạng thái':
+                    newAttribute = 'status';
+                    break;
                   default:
                     break;
                 }
@@ -817,6 +869,7 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.fullName = item.fullName ? item.fullName : null;
         newData.rankAndDegree = item.rankAndDegree ? item.rankAndDegree : null;
+        newData.status = item.status ? item.status : null;
         newData.startTime = item.startTime ? item.startTime : null
         newData.birthday = item.birthday ? item.birthday : null
         newData.gdTime = item.gdTime ? item.gdTime : null

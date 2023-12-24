@@ -13,7 +13,7 @@
               />
 <!--              <img-->
 <!--                  src="@/assets/static/images/logo-2.png"-->
-<!--                  alt="GHTK"-->
+<!--                  alt="SC5"-->
 <!--                  width="500px"-->
 <!--                  class="brand-img"-->
 <!--              />-->
@@ -24,7 +24,7 @@
               <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÀ PHÂN CÔNG GIẢNG DẠY</span>
             </h4>
 <!--            <h4 class="mt-2">-->
-<!--              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÍ ĐIỆN TỬ GHTK PAY</span>-->
+<!--              <span style="font-weight: 500">HỆ THỐNG QUẢN LÝ VÍ ĐIỆN TỬ SC5</span>-->
 <!--            </h4>-->
           </div>
           <div class="modal-dialog w-100 mx-auto">

@@ -7,7 +7,7 @@
   >
     <div class="app-header__logo">
       <img
-          class="logo-header-ghtk"
+          class="logo-header-sc5"
           src="@/assets/static/images/download.png"
       />
       <span class="title-logo">SOICT HUST</span>
@@ -239,7 +239,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.logo-header-ghtk {
+.logo-header-sc5 {
   margin-top: 1px;
   height: 47px;
   background: no-repeat;

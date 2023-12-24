@@ -196,7 +196,7 @@
 
     <b-modal
         id="modal-upload-subject"
-        :modal-class="['ghtk-modal']"
+        :modal-class="['sc5-modal']"
         :header-class="['modal__header']"
         :no-close-on-backdrop="true"
         size="lg"

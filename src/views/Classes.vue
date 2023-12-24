@@ -86,7 +86,9 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
-
+          <template #cell(room)="row">
+            {{ concatBuildingAndRoom(row.item.building, row.item.room) }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -190,9 +192,9 @@
                 v-model="$v.currentData.subjectId.$model"
                 placeholder="Nhập học phần"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.code) }"
+                :class="{ 'is-invalid': validationStatus($v.currentData.subjectId) }"
             />
-            <div v-if="!$v.currentData.code.required" class="invalid-feedback">
+            <div v-if="!$v.currentData.subjectId.required" class="invalid-feedback">
               Học phần không được để trống.
             </div>
           </b-form-group>
@@ -245,6 +247,36 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
+            <label>Tòa nhà<span class="text-danger">*</span>:</label>
+            <b-form-input
+                id="input-building"
+                v-model="$v.currentData.building.$model"
+                placeholder="Nhập tòa nhà"
+                trim
+                :class="{ 'is-invalid': validationStatus($v.currentData.code) }"
+            />
+            <div v-if="!$v.currentData.building.required" class="invalid-feedback">
+              Tòa nhà không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Phòng học<span class="text-danger">*</span>:</label>
+            <b-form-input
+                id="input-room"
+                v-model="$v.currentData.room.$model"
+                placeholder="Nhập phòng học"
+                trim
+                :class="{ 'is-invalid': validationStatus($v.currentData.room) }"
+            />
+            <div v-if="!$v.currentData.room.required" class="invalid-feedback">
+              Phòng học không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
             <label>Giảng viên phụ trách<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-teacher-id"
@@ -277,7 +309,7 @@
 
     <b-modal
         id="modal-upload-class"
-        :modal-class="['ghtk-modal']"
+        :modal-class="['sc5-modal']"
         :header-class="['modal__header']"
         :no-close-on-backdrop="true"
         size="lg"
@@ -346,17 +378,12 @@
 <script>
 import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
-import {
-  CREATE_CLASS,
-  FETCH_CLASSES,
-  UPDATE_CLASS
-} from "@/store/action.type"
+import {CREATE_CLASS, FETCH_CLASSES, UPDATE_CLASS} from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatDate2, formatTime} from "@/common/utils";
+import {checkPermission} from "@/common/utils";
 import {PAGINATION_OPTIONS, SAMPLE_CLASS_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
-import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
 
@@ -380,6 +407,8 @@ const initClass = {
   timeOfDay: null,
   isAssigned: null,
   teacherId: null,
+  building: null,
+  room: null,
 }
 
 const initNewDataExcel = {
@@ -392,6 +421,8 @@ const initNewDataExcel = {
   timeOfDay: null,
   isAssigned: null,
   teacherId: null,
+  building: null,
+  room: null,
 };
 
 export default {
@@ -475,6 +506,7 @@ export default {
           thStyle: "width: 6%",
           thClass: 'align-middle'
         },
+        {key: "room", label: "Phòng học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "teacherId",
           label: "Giảng viên phụ trách",
@@ -515,6 +547,8 @@ export default {
       week: {required},
       dayOfWeek: {required},
       timeOfDay: {required},
+      building: {required},
+      room: {required}
     },
   },
   mounted() {
@@ -636,6 +670,13 @@ export default {
         name: this.currentData.name,
         code: this.currentData.code,
         semester: this.currentData.semester,
+        subjectId: this.currentData.subjectId,
+        week: this.currentData.week,
+        dayOfWeek: this.currentData.dayOfWeek,
+        timeOfDay: this.currentData.timeOfDay,
+        teacherId: this.currentData.teacherId,
+        building: this.currentData.building,
+        room: this.currentData.room,
       }
 
       if (this.isUpdate) {
@@ -736,6 +777,12 @@ export default {
                   case 'Tiết trong ngày':
                     newAttribute = 'timeOfDay';
                     break;
+                  case 'Tòa nhà':
+                    newAttribute = 'building';
+                    break;
+                  case 'Phòng học':
+                    newAttribute = 'room';
+                    break;
                   default:
                     break;
                 }
@@ -802,6 +849,12 @@ export default {
         }, 1000);
       }
     },
+    concatBuildingAndRoom(building, room) {
+      if (building && room) {
+        return building + "-" + room;
+      }
+      return "";
+    }
   }
 }
 </script>

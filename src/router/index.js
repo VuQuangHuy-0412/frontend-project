@@ -42,12 +42,6 @@ const router = new Router({
       meta: { title: 'Quản lý log', layout: 'default' }
     },
     {
-      path: '/admin/accounts',
-      name: 'Accounts',
-      component: () => import("@/views/Accounts"),
-      meta: { title: 'Quản lý tài khoản', layout: 'default' }
-    },
-    {
       path: '/admin/teachers',
       name: 'Teachers',
       component: () => import("@/views/Teachers"),
@@ -98,8 +92,7 @@ router.beforeEach((to, from, next) => {
   const publicPages = ['/login', '/config-api'];
   const authRequired = !publicPages.includes(to.path);
   const isAuthenticated = !!StorageService.get("Token");
-  const isGchatAuthenticated = !!StorageService.get("ewallet_gchat_token_test");
-  if (to.path.includes('/cs/') && isAuthenticated && isGchatAuthenticated) {
+  if (to.path.includes('/cs/') && isAuthenticated) {
     next()
   }
   if (to.path.includes('/admin/') && isAuthenticated) {

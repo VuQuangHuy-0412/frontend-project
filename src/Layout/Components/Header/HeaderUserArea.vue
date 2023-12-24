@@ -279,7 +279,7 @@ export default {
 
             loader.hide();
             if (response.status === 200) {
-              StorageService.save("ewallet_token", response.data.accessToken);
+              StorageService.save("sc5_token", response.data.accessToken);
               StorageService.save("Token", JSON.stringify(response.data));
               await getAuthenticatedUser();
               this.$message.closeAll();

@@ -4,7 +4,6 @@ import auth from "./auth.module";
 import adminUser from "./adminuser.module";
 import role from "../store/role.module";
 import log from "./adminlog.module"
-import accounts from "./account.module"
 import file from "./file.module"
 import event from "./event.module"
 import teacher from "./teacher.module"
@@ -22,7 +21,6 @@ export default new Vuex.Store({
     adminUser: adminUser,
     role: role,
     log: log,
-    accounts,
     teacher,
     groupTeacher,
     classes,

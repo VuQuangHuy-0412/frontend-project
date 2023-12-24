@@ -130,7 +130,7 @@ export function performLogout() {
   if (intervalName) {
     clearInterval(intervalName);
   }
-  StorageService.destroy("ewallet_token");
+  StorageService.destroy("sc5_token");
   StorageService.destroy("Token");
   StorageService.destroy("userInfo");
   SessionStorageService.destroy("config");
@@ -144,7 +144,7 @@ export async function logout() {
     token = JSON.parse(token);
     httpResource.defaults.baseURL = Configuration.value("sc5AdminURL");
     await httpResource.post("/logout", token.refreshToken, { headers: { "Content-Type": "text/plain" } });
-    StorageService.destroy("ewallet_token");
+    StorageService.destroy("sc5_token");
     StorageService.destroy("Token");
     StorageService.destroy("userInfo");
     SessionStorageService.destroy("config");
@@ -164,7 +164,7 @@ export async function refreshTokenInternal() {
         performLogout();
       } else {
         token.accessToken = response.data.accessToken;
-        StorageService.save("ewallet_token", response.data.accessToken);
+        StorageService.save("sc5_token", response.data.accessToken);
         StorageService.save("Token", JSON.stringify(token));
       }
     } else {

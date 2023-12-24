@@ -157,7 +157,7 @@
 
     <b-modal
         id="modal-upload-group-teacher-mapping"
-        :modal-class="['ghtk-modal']"
+        :modal-class="['sc5-modal']"
         :header-class="['modal__header']"
         :no-close-on-backdrop="true"
         size="lg"
