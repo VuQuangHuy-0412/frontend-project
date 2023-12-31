@@ -277,6 +277,21 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
+            <label>Số giờ trong tuần<span class="text-danger">*</span>:</label>
+            <b-form-input
+                id="input-room"
+                v-model="$v.currentData.timeOfClass.$model"
+                placeholder="Nhập số giờ trong tuần"
+                trim
+                :class="{ 'is-invalid': validationStatus($v.currentData.timeOfClass) }"
+            />
+            <div v-if="!$v.currentData.timeOfClass.required" class="invalid-feedback">
+              Số giờ trong tuần không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
             <label>Giảng viên phụ trách<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-teacher-id"
@@ -409,6 +424,7 @@ const initClass = {
   teacherId: null,
   building: null,
   room: null,
+  timeOfClass: null
 }
 
 const initNewDataExcel = {
@@ -423,6 +439,7 @@ const initNewDataExcel = {
   teacherId: null,
   building: null,
   room: null,
+  timeOfClass: null
 };
 
 export default {
@@ -507,6 +524,7 @@ export default {
           thClass: 'align-middle'
         },
         {key: "room", label: "Phòng học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "timeOfClass", label: "Số giờ dạy", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "teacherId",
           label: "Giảng viên phụ trách",
@@ -548,7 +566,8 @@ export default {
       dayOfWeek: {required},
       timeOfDay: {required},
       building: {required},
-      room: {required}
+      room: {required},
+      timeOfClass: {required}
     },
   },
   mounted() {
@@ -677,6 +696,7 @@ export default {
         teacherId: this.currentData.teacherId,
         building: this.currentData.building,
         room: this.currentData.room,
+        timeOfClass: this.currentData.timeOfClass,
       }
 
       if (this.isUpdate) {
@@ -783,6 +803,9 @@ export default {
                   case 'Phòng học':
                     newAttribute = 'room';
                     break;
+                  case 'Số giờ trong tuần':
+                    newAttribute = 'timeOfClass';
+                    break;
                   default:
                     break;
                 }
@@ -813,6 +836,9 @@ export default {
         newData.week = item.week ? item.week : null
         newData.dayOfWeek = item.dayOfWeek ? item.dayOfWeek : null
         newData.timeOfDay = item.timeOfDay ? item.timeOfDay : null
+        newData.building = item.building ? item.building : null
+        newData.room = item.room ? item.room : null
+        newData.timeOfClass = item.timeOfClass ? item.timeOfClass : null
 
         this.uploadDataExcel.push({...newData})
       });
