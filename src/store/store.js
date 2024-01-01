@@ -13,6 +13,7 @@ import studentProject from "./studentproject.module"
 import subject from "./subject.module"
 import constraint from "./constraint.module"
 import timetablingTeacher from "./timetablingteacher.module"
+import timetablingStudent from "./timetablingstudent.module"
 
 Vue.use(Vuex);
 
@@ -31,5 +32,6 @@ export default new Vuex.Store({
     event,
     constraint,
     timetablingTeacher,
+    timetablingStudent,
   }
 });
