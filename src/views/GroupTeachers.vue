@@ -77,7 +77,7 @@
             <div class="d-flex justify-content-center flex-wrap">
               <a
                   v-if="(userInfo && userInfo.permissions.indexOf('group_teacher_detail') !== -1 && row.item.id)"
-                  :href="`/admin/group-teacher/${row.item.id}`"
+                  :href="`/admin/group-teacher?id=${row.item.id}`"
                   class="m-1"
                   type="button"
                   title="Chi tiết nhóm chuyên môn"
