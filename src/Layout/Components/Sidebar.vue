@@ -141,6 +141,11 @@ export default {
               permission: 'role_list'
             },
             {
+              href: "/admin/permission",
+              title: "Vai trò và quyền hạn",
+              permission: 'permission_list'
+            },
+            {
               href: "/admin/log",
               title: "Log hệ thống",
               permission: 'admin_log_list'
