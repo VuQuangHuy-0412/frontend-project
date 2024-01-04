@@ -6,8 +6,8 @@ export default class Configuration {
   static get CONFIG() {
     // must have format $VUE_APP_XXX
     return {
-      sc5AdminURL: "https://sc5-backend.university-timetabling.com",
-      // sc5AdminURL: "http://localhost:8084",
+      // sc5AdminURL: "https://sc5-backend.university-timetabling.com",
+      sc5AdminURL: "http://localhost:8084",
     };
   }
 

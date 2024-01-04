@@ -127,17 +127,6 @@ export default {
           ],
         },
         {
-          title: "Xuất dữ liệu phân công",
-          icon: 'fa fa-wallet',
-          child: [
-            {
-              href: "/admin/export",
-              title: "Xuất dữ liệu phân công",
-              permission: 'export_timetabling'
-            }
-          ],
-        },
-        {
           title: "Quản trị",
           icon: 'fa fa-user',
           child: [

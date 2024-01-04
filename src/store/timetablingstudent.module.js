@@ -2,6 +2,7 @@ import {SET_STUDENTS_BY_TEACHER, SET_INPUT_DATA_STUDENT, SET_TIMETABLING_STUDENT
 import {SUCCESS} from "@/common/config"
 import baseMixins from "../components/mixins/base"
 import {
+    CREATE_FILE_TIMETABLING_STUDENT, CREATE_FILE_TIMETABLING_TEACHER,
     FETCH_STUDENTS_BY_TEACHER,
     INPUT_DATA_STUDENT,
     TIMETABLING_STUDENT,
@@ -77,6 +78,18 @@ const actions = {
                 resolve(null)
             }
         })
+    },
+    [CREATE_FILE_TIMETABLING_STUDENT](context, params) {
+        baseMixins.methods.get('/admin/timetabling-student/list/excel', '', {params: null, responseType: 'blob'})
+            .then(({ data }) => {
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', "student_timetabling.xlsx");
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(({ error }) => error);
     },
 }
 

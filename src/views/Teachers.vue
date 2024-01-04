@@ -67,7 +67,7 @@
           </b-col>
         </b-row>
         <b-row class="mb-2">
-          <b-col md="4" style="margin-top: 30px">
+          <b-col md="8" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
@@ -84,8 +84,17 @@
               <font-awesome-icon :icon="['fas', 'eraser']"/>
               Xóa lọc
             </b-button>
+
+            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadLanguageTeacher"
+                      style="border: none">
+              <font-awesome-icon :icon="['fas','file-excel']"/>
+              <span v-if="!loadingFileLanguageTeacher"
+              ><i class="fas fa-upload"></i> Upload file ngôn ngữ của giảng viên
+              </span>
+              <i v-if="loadingFileLanguageTeacher" class="fa fa-spinner fa-spin"/>
+            </b-button>
           </b-col>
-          <b-col md="8" class="text-right mt-30">
+          <b-col md="4" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('teacher_create')"
                 variant="primary"
@@ -412,6 +421,73 @@
         </div>
       </div>
     </b-modal>
+
+    <b-modal
+        id="modal-upload-language-teacher"
+        :modal-class="['sc5-modal']"
+        :header-class="['modal__header']"
+        :no-close-on-backdrop="true"
+        size="lg"
+        @hidden="closeModalUploadLanguageTeacher"
+    >
+      <template slot="modal-header">
+        <div class="modal__header--item title font-weight-500">
+          Upload file ds ngôn ngữ của giảng viên
+        </div>
+        <div class="modal__header--item close-btn px-2" @click="closeModalUploadLanguageTeacher">
+          <i class="fas fa-times"></i>
+        </div>
+      </template>
+      <b-row>
+        <b-col md="2">
+          <div style="font-weight: bold">File mẫu</div>
+        </b-col>
+        <b-col md="6">
+          <a
+              :href="SAMPLE_LANGUAGE_TEACHER_IMPORT_LINK"
+              target="_self"
+              style="font-weight: bold;color:black!important;"
+          >Format_ThemLangOfGV</a
+          >
+        </b-col>
+      </b-row>
+      <b-row class="mt-3">
+        <b-col md="2">
+          <div style="font-weight: bold">File đã upload</div>
+        </b-col>
+        <b-col md="6">
+          <div style="font-weight: bold; color:black!important;" v-if="currentFileLanguageTeacher">
+            {{ currentFileLanguageTeacher.name }} <i @click="handleResetFileLanguageTeacher" class="fas fa-times"
+                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: rgb(128,128,128)"></i>
+          </div>
+        </b-col>
+      </b-row>
+      <div class="py-2">
+        <b-form-group v-if="userInfo" class="mt-2">
+          <i class="fas fa-upload custom-upload"></i>
+          <div class="mr-4">
+            <b-form-file
+                id="input-file"
+                ref="fileExcelLanguageTeacher"
+                multiple
+                type="file"
+                accept=".xls, .xlsx"
+                placeholder="Kéo thả file hoặc"
+                browse-text="Chọn file"
+                @change="handleFilesUploadLanguageTeacher"
+            ></b-form-file>
+          </div>
+        </b-form-group>
+        <div style="width: 100%; text-align: center">
+          <b-button :disabled="!currentFileLanguageTeacher || loadingFileLanguageTeacher" variant="primary" class="py-2"
+                    style="margin-top: 90px;z-index: 1000;width: 200px" @click.prevent="handleUploadDataExcelLanguageTeacher">
+            <span v-if="!loadingFileLanguageTeacher"
+            > Xác nhận</span>
+            <i v-if="loadingFileLanguageTeacher" class="fa fa-spinner fa-spin mr-2"/>
+          </b-button>
+        </div>
+      </div>
+    </b-modal>
   </b-form>
 </template>
 <script>
@@ -425,7 +501,7 @@ import {
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
 import {checkPermission, formatDate2, formatTime} from "@/common/utils";
-import {PAGINATION_OPTIONS, SAMPLE_TEACHER_IMPORT_LINK} from "@/common/config"
+import {PAGINATION_OPTIONS, SAMPLE_TEACHER_IMPORT_LINK, SAMPLE_LANGUAGE_TEACHER_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
 import moment from 'moment-timezone';
@@ -470,6 +546,11 @@ const initNewDataExcel = {
   status: null
 };
 
+const initNewDataExcelLanguageTeacher = {
+  languageId: null,
+  teacherId: null,
+};
+
 export default {
   name: "Teachers",
   components: {PageTitle, DatePicker, MultiSelect},
@@ -477,11 +558,13 @@ export default {
   data() {
     return {
       loadingFile: false,
+      loadingFileLanguageTeacher: false,
       startTimeFrom: null,
       startTimeTo: new Date(),
       totalRow: 0,
       PAGINATION_OPTIONS,
       SAMPLE_TEACHER_IMPORT_LINK,
+      SAMPLE_LANGUAGE_TEACHER_IMPORT_LINK,
       subheading: "Quản lý danh sách giảng viên.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
       heading: "Danh sách giảng viên",
@@ -574,10 +657,14 @@ export default {
       userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null,
       currentData: Object.assign({}, {...initTeacher}),
       currentDetail: null,
+      currentDetailLanguageTeacher: null,
       currentFile: null,
+      currentFileLanguageTeacher: null,
       isUpdate: false,
       uploadDataExcel: [],
+      uploadDataExcelLanguageTeacher: [],
       dataExcel: [],
+      dataExcelLanguageTeacher: [],
       selectedGroupTeacher: { value: null, text: "Tất cả" },
     }
   },
@@ -947,7 +1034,121 @@ export default {
           groupTeacherText += item.name;
       })
       return groupTeacherText;
-    }
+    },
+    openModalUploadLanguageTeacher() {
+      this.$root.$emit("bv::show::modal", 'modal-upload-language-teacher')
+    },
+    closeModalUploadLanguageTeacher() {
+      this.currentDetailLanguageTeacher = null
+      this.currentFileLanguageTeacher = null
+      this.$root.$emit("bv::hide::modal", 'modal-upload-language-teacher')
+    },
+    handleResetFileLanguageTeacher() {
+      this.uploadDataExcelLanguageTeacher = []
+      this.dataExcelLanguageTeacher = []
+      this.currentFileLanguageTeacher = null
+      this.$nextTick(() => {
+        this.$refs.fileExcelLanguageTeacher.reset();
+      })
+    },
+    handleFilesUploadLanguageTeacher(event) {
+      this.dataExcelLanguageTeacher = [];
+      this.uploadDataExcelLanguageTeacher = [];
+      this.currentFileLanguageTeacher = null;
+      let uploadedFiles = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
+      if (!uploadedFiles) return;
+
+      this.currentFileLanguageTeacher = uploadedFiles;
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        const target = reader.result;
+        const wb = XLSX.read(target, {type: "array", cellDates: true});
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false});
+        this.handleFormatJSONFromExcelLanguageTeacher(data);
+      };
+      reader.readAsArrayBuffer(uploadedFiles);
+    },
+    handleFormatJSONFromExcelLanguageTeacher(json) {
+      if (!json || json.length <= 1) return;
+
+      this.dataExcelLanguageTeacher = json
+          .filter((item, index) => index !== 0)
+          .map((item, index) => {
+            let teacher = Object.assign({});
+
+            item.forEach((itemValue, indexValue) => {
+              if (json[0][indexValue]) {
+                let newAttribute = '';
+                switch (json[0][indexValue]) {
+                  case 'Mã ngôn ngữ':
+                    newAttribute = 'languageId';
+                    break;
+                  case 'Mã giảng viên':
+                    newAttribute = 'teacherId';
+                    break;
+                  default:
+                    break;
+                }
+                teacher[newAttribute] = itemValue;
+              }
+            });
+
+            return teacher;
+          });
+    },
+    async handleUploadDataExcelLanguageTeacher() {
+      if (!this.dataExcelLanguageTeacher || this.dataExcelLanguageTeacher.length === 0) {
+        this.$message({
+          message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
+          type: "warning",
+          showClose: true,
+        });
+        return
+      }
+      if (!this.dataExcelLanguageTeacher || this.dataExcelLanguageTeacher.length === 0) return null
+
+      this.dataExcelLanguageTeacher.forEach(item => {
+        let newData = Object.assign({}, {...initNewDataExcelLanguageTeacher})
+        newData.languageId = item.languageId ? item.languageId : null;
+        newData.teacherId = item.teacherId ? item.teacherId : null;
+
+        this.uploadDataExcelLanguageTeacher.push({...newData})
+      });
+
+      this.loadingFileLanguageTeacher = true;
+      const dataFiltered = this.uploadDataExcelLanguageTeacher.filter((item) => {
+        return item.teacherId !== null;
+      });
+
+      let res = await this.post('/language-teacher/upload-excel', {
+        languageTeacherCreateRequests: dataFiltered
+      });
+      setTimeout(() => {
+        this.loadingFileLanguageTeacher = false;
+      }, 300);
+
+      if (res.status === 200) {
+        this.$message({
+          message: 'Tải dữ liệu lên thành công.',
+          type: "success",
+          showClose: true,
+        });
+
+        this.uploadDataExcelLanguageTeacher = []
+        this.dataExcelLanguageTeacher = []
+        this.currentFileLanguageTeacher = null
+        this.$nextTick(() => {
+          this.$refs.fileExcelLanguageTeacher.reset();
+        })
+
+        setTimeout(() => {
+          this.closeModalUploadLanguageTeacher();
+          this.fetchTeachers();
+        }, 1000);
+      }
+    },
   }
 }
 </script>

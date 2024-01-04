@@ -2,6 +2,7 @@ import {SET_CLASSES_BY_TEACHER, SET_INPUT_DATA, SET_TIMETABLING_TEACHER_STATUS} 
 import {SUCCESS} from "@/common/config"
 import baseMixins from "../components/mixins/base"
 import {
+    CREATE_FILE_TIMETABLING_TEACHER,
     FETCH_CLASSES_BY_TEACHER,
     INPUT_DATA,
     TIMETABLING_TEACHER,
@@ -77,6 +78,18 @@ const actions = {
                 resolve(null)
             }
         })
+    },
+    [CREATE_FILE_TIMETABLING_TEACHER](context, params) {
+        baseMixins.methods.get('/admin/timetabling-teacher/list/excel', '', {params: null, responseType: 'blob'})
+            .then(({ data }) => {
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', "class_timetabling.xlsx");
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(({ error }) => error);
     },
 }
 

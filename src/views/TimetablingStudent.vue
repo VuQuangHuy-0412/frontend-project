@@ -23,7 +23,11 @@
         <b-col md="12"><h6>Hệ thống đang thực hiện phân công hướng dẫn</h6></b-col>
       </b-row>
       <b-row v-if="timetablingStudentStatus && timetablingStudentStatus.status === 'SUCCESS'">
-        <b-col md="12"><h6>Hệ thống đã thực hiện phân công hướng dẫn xong</h6></b-col>
+        <b-col md="10"><h6>Hệ thống đã thực hiện phân công hướng dẫn xong</h6></b-col>
+        <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="exportTimetablingStudent" style="border: none">
+          <font-awesome-icon :icon="['fas','file-excel']"/>
+          Xuất dữ liệu
+        </b-button>
       </b-row>
     </b-card>
 
@@ -178,7 +182,11 @@ import {
   TIMETABLING_STUDENT,
   INPUT_DATA_STUDENT,
   TIMETABLING_STUDENT_STATUS,
-  FETCH_STUDENTS_BY_TEACHER, ALL_TEACHER, UPDATE_STUDENT_PROJECT
+  FETCH_STUDENTS_BY_TEACHER,
+  ALL_TEACHER,
+  UPDATE_STUDENT_PROJECT,
+  CREATE_FILE_TIMETABLING_TEACHER,
+  CREATE_FILE_TIMETABLING_STUDENT
 } from "@/store/action.type";
 import {SET_ALL_TEACHERS} from "@/store/mutation.type";
 
@@ -406,6 +414,9 @@ export default {
     validationStatus: function (validation) {
       return typeof validation != "undefined" ? validation.$error : false;
     },
+    exportTimetablingStudent() {
+      this.$store.dispatch(CREATE_FILE_TIMETABLING_STUDENT, null);
+    }
   }
 }
 </script>
