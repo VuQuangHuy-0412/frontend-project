@@ -142,6 +142,14 @@
           <!--          <template #cell(content)="row">-->
           <!--            {{ concatGroupTeacher(row.item.groupTeacher) }}-->
           <!--          </template>-->
+          <template #cell(type)="row">
+          <span v-if="row.item.type === 'class'">
+            Giảng dạy
+          </span>
+            <span v-if="row.item.type === 'student'">
+            Hướng dẫn
+          </span>
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -307,7 +315,19 @@
                 :options="optionsStatus.filter(rank => rank.value != null)"
                 :searchable="true"
                 value-field="value" text-field="text"
-                v-model.trim="currentData.status"
+                v-model.trim="currentDataRequired.status"
+            >
+            </b-form-select>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Loại ràng buộc:</label>
+            <b-form-select
+                :options="optionsType.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                v-model.trim="currentDataRequired.type"
             >
             </b-form-select>
           </b-form-group>
@@ -366,6 +386,7 @@ const initRequiredConstraint = {
   code: null,
   value: null,
   status: null,
+  type: null,
 }
 
 export default {
@@ -387,6 +408,11 @@ export default {
         {value: null, text: 'Tất cả'},
         {value: 0, text: 'Không hoạt động'},
         {value: 1, text: 'Hoạt động'},
+      ],
+      selectedType: null,
+      optionsType: [
+        {value: 'class', text: 'Giảng dạy'},
+        {value: 'student', text: 'Hướng dẫn'},
       ],
       selectedTeacherColumnCompare: null,
       optionsTeacherColumnCompare: [
@@ -464,6 +490,7 @@ export default {
         {key: "code", label: "Mã ràng buộc", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "value", label: "Nội dung ràng buộc", visible: true, thStyle: "width: 12%", thClass: 'align-middle'},
         {key: "status", label: "Trạng thái", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "type", label: "Loại ràng buộc", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "actions",
           label: "Chức năng",
@@ -634,6 +661,7 @@ export default {
         code: this.currentDataRequired.code,
         value: this.currentDataRequired.value,
         status: this.currentData.status,
+        type: this.currentData.type,
       }
 
       if (this.isUpdate) {
