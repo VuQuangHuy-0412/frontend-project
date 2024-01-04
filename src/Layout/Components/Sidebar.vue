@@ -137,12 +137,12 @@ export default {
             },
             {
               href: "/admin/role",
-              title: "Vai trò và quyền hạn",
+              title: "Vai trò",
               permission: 'role_list'
             },
             {
               href: "/admin/permission",
-              title: "Vai trò và quyền hạn",
+              title: "Quyền hạn",
               permission: 'permission_list'
             },
             {
