@@ -147,7 +147,7 @@
           <span v-if="row.item.status === 0">
             Không hoạt động
           </span>
-            <span v-if="row.item.status === 'ThS'">
+            <span v-if="row.item.status === 1">
             Hoạt động
           </span>
           </template>
