@@ -387,8 +387,8 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.id = this.id ? this.id.value : null;
-      this.dataFilter.name = this.name ? this.name.value : null;
+      this.dataFilter.id = (this.id && this.id !== '') ? this.dataFilter.id : null;
+      this.dataFilter.name = (this.name && this.name !== '') ? this.dataFilter.name : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
