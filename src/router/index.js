@@ -16,15 +16,6 @@ const router = new Router({
       path: '/',
       name: 'DefaultPage',
       meta: { title: 'Quản lý giảng dạy', layout: 'default' },
-      beforeEnter: (to, from, next) => {
-        const { uri } = to.query;
-        if (uri != null && uri !== '/') {
-          next(false);
-          router.push(uri);
-        } else {
-          next();
-        }
-      }
     },
     {
       path: '/admin/user',
@@ -63,7 +54,7 @@ const router = new Router({
       meta: { title: 'Quản lý nhóm chuyên môn', layout: 'default' }
     },
     {
-      path: '/admin/group-teacher',
+      path: '/admin/group-teacher/:id',
       name: 'GroupTeacher',
       component: () => import("@/views/GroupTeacherDetail"),
       meta: { title: 'Chi tiết nhóm chuyên môn', layout: 'default' }
