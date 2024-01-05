@@ -15,7 +15,16 @@ const router = new Router({
     {
       path: '/',
       name: 'DefaultPage',
-      meta: { title: 'Quản lý giảng dạy', layout: 'default' }
+      meta: { title: 'Quản lý giảng dạy', layout: 'default' },
+      beforeEnter: (to, from, next) => {
+        const { uri } = to.query;
+        if (uri != null && uri !== '/') {
+          next(false);
+          router.push(uri);
+        } else {
+          next();
+        }
+      }
     },
     {
       path: '/admin/user',
