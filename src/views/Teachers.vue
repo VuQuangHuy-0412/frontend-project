@@ -508,7 +508,6 @@ import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
 import {SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
-import MultiSelect from 'primevue/multiselect';
 
 const initData = {
   id: null,
@@ -553,7 +552,7 @@ const initNewDataExcelLanguageTeacher = {
 
 export default {
   name: "Teachers",
-  components: {PageTitle, DatePicker, MultiSelect},
+  components: {PageTitle, DatePicker},
   mixins: [baseMixins],
   data() {
     return {
@@ -1184,6 +1183,10 @@ export default {
 }
 
 #modal-upload-teacher .modal-footer {
+  display: none;
+}
+
+#modal-upload-language-teacher .modal-footer {
   display: none;
 }
 

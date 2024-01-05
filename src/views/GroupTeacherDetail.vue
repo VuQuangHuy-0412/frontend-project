@@ -378,7 +378,7 @@ export default {
     validation() {
     },
     getCurrentGroupId() {
-      return this.$route.query && this.$route.query.id
+      return this.$route.params && this.$route.params.id
     },
     optionsTeacher() {
       return this.formatOptionsTeacher(this.allTeachers);
