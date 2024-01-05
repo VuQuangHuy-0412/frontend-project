@@ -1191,6 +1191,10 @@ export default {
   display: none;
 }
 
+#modal-upload-language-teacher .modal-footer {
+  display: none;
+}
+
 .custom-upload {
   font-size: 35px;
   color: #01904a;
