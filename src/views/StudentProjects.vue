@@ -78,6 +78,21 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
+          <template #cell(teacher1Id)="row">
+            {{ row.item.teacher1 ? row.item.teacher1.fullName : "" }}
+          </template>
+          <template #cell(teacher2Id)="row">
+            {{ row.item.teacher2 ? row.item.teacher2.fullName : "" }}
+          </template>
+          <template #cell(teacher3Id)="row">
+            {{ row.item.teacher3 ? row.item.teacher3.fullName : "" }}
+          </template>
+          <template #cell(teacherAssignedId)="row">
+            {{ row.item.teacherAssigned ? row.item.teacherAssigned.fullName : "" }}
+          </template>
+          <template #cell(isAssigned)="row">
+            {{ row.item.isAssigned === 1 ? "Đã phân công" : "Chưa phân công" }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a

@@ -83,6 +83,9 @@
           <template #cell(key)="row">
             {{ dataFilter.pageSize * (dataFilter.page - 1) + row.index + 1 }}
           </template>
+          <template #cell(groupId)="row">
+            {{ row.item.groupTeacher ? row.item.groupTeacher.name : "" }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a

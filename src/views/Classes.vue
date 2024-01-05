@@ -89,6 +89,15 @@
           <template #cell(room)="row">
             {{ concatBuildingAndRoom(row.item.building, row.item.room) }}
           </template>
+          <template #cell(subjectId)="row">
+            {{ row.item.subject ? row.item.subject.name : "" }}
+          </template>
+          <template #cell(teacherId)="row">
+            {{ row.item.teacher ? row.item.teacher.fullName : "" }}
+          </template>
+          <template #cell(isAssigned)="row">
+            {{ row.item.isAssigned === 1 ? "Đã phân công" : "Chưa phân công" }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
