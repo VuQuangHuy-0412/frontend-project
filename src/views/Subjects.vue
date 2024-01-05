@@ -392,10 +392,6 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.id = this.id ? this.id.value : null;
-      this.dataFilter.name = this.name ? this.name.value : null;
-      this.dataFilter.code = this.code ? this.code.value : null;
-      this.dataFilter.groupId = this.groupId ? this.groupId.value : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
@@ -442,9 +438,6 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
-      this.name = '';
-      this.code = '';
-      this.id = '';
       this.handleDataFilter();
       this.fetchSubjects();
     },

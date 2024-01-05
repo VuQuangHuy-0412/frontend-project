@@ -454,10 +454,6 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.id = this.id ? this.id.value : null;
-      this.dataFilter.name = this.name ? this.name.value : null;
-      this.dataFilter.studentCode = this.studentCode ? this.name.studentCode : null;
-      this.dataFilter.timeHd = this.timeHd ? this.timeHd.value : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
@@ -504,10 +500,6 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
-      this.name = '';
-      this.studentCode = '';
-      this.timeHd = '';
-      this.id = '';
       this.handleDataFilter();
       this.fetchStudentProjects();
     },

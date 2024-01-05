@@ -387,8 +387,6 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.id = (this.id && this.id !== '') ? this.dataFilter.id : null;
-      this.dataFilter.name = (this.name && this.name !== '') ? this.dataFilter.name : null;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
     },
@@ -435,8 +433,6 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
-      this.name = '';
-      this.id = '';
       this.handleDataFilter();
       this.fetchGroupTeachers();
     },

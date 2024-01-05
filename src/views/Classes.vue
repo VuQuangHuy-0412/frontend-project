@@ -595,9 +595,6 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.id = this.id ? this.id.value : null;
-      this.dataFilter.name = this.name ? this.name.value : null;
-      this.dataFilter.code = this.code ? this.code.value : null;
       this.dataFilter.semester = this.selectedSemester === null ? null : this.selectedSemester.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
@@ -645,10 +642,7 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
-      this.name = '';
-      this.code = '';
       this.selectedSemester = {value: null, text: 'Tất cả'};
-      this.id = '';
       this.handleDataFilter();
       this.fetchClasses();
     },

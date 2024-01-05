@@ -720,8 +720,6 @@ export default {
     handleDataFilter() {
       this.dataFilter.startTimeFrom = this.startTimeFrom && formatTime(this.startTimeFrom, 'START');
       this.dataFilter.startTimeTo = this.startTimeTo && formatTime(this.startTimeTo, 'END');
-      this.dataFilter.id = this.id !== '' ? this.dataFilter.id : null;
-      this.dataFilter.fullName = this.fullName !== '' ? this.dataFilter.fullName : null;
       this.dataFilter.rankAndDegree = this.selectedRankAndDegree === null ? null : this.selectedRankAndDegree.value;
       this.dataFilter.status = this.status === null ? null : this.selectedStatus.value;
       this.dataFilter.page = 1;
@@ -775,11 +773,9 @@ export default {
       });
       this.startTimeTo = new Date();
       this.startTimeFrom = null;
-      this.fullName = '';
       this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
       this.selectedStatus = {value: null, text: 'Tất cả'};
       this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
-      this.id = '';
       this.handleDataFilter();
       this.fetchTeachers();
     },
