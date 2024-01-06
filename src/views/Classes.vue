@@ -98,6 +98,12 @@
           <template #cell(isAssigned)="row">
             {{ row.item.isAssigned === 1 ? "Đã phân công" : "Chưa phân công" }}
           </template>
+          <template #cell(startTime)="row">
+            {{ row.item.startTime.length === 3 ? "0" + startTime : startTime }}
+          </template>
+          <template #cell(endTime)="row">
+            {{ row.item.endTime.length === 3 ? "0" + endTime : endTime }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -241,17 +247,13 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Tiết học trong ngày<span class="text-danger">*</span>:</label>
+            <label>Tiết học trong ngày:</label>
             <b-form-input
                 id="input-time-of-day"
                 v-model="$v.currentData.timeOfDay.$model"
                 placeholder="Nhập tiết học trong ngày"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.timeOfDay) }"
             />
-            <div v-if="!$v.currentData.timeOfDay.required" class="invalid-feedback">
-              Tiết học trong ngày không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -297,6 +299,28 @@
             <div v-if="!$v.currentData.timeOfClass.required" class="invalid-feedback">
               Số giờ trong tuần không được để trống.
             </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Thời gian bắt đầu:</label>
+            <b-form-input
+                id="input-start-time"
+                v-model="$v.currentData.startTime.$model"
+                placeholder="Nhập thời gian bắt đầu"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Thời gian kết thúc:</label>
+            <b-form-input
+                id="input-end-time"
+                v-model="$v.currentData.endTime.$model"
+                placeholder="Nhập thời gian kết thúc"
+                trim
+            />
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -433,7 +457,9 @@ const initClass = {
   teacherId: null,
   building: null,
   room: null,
-  timeOfClass: null
+  timeOfClass: null,
+  startTime: null,
+  endTime: null,
 }
 
 const initNewDataExcel = {
@@ -448,7 +474,9 @@ const initNewDataExcel = {
   teacherId: null,
   building: null,
   room: null,
-  timeOfClass: null
+  timeOfClass: null,
+  startTime: null,
+  endTime: null,
 };
 
 export default {
@@ -532,6 +560,8 @@ export default {
           thStyle: "width: 6%",
           thClass: 'align-middle'
         },
+        {key: "startTime", label: "Thời gian bắt đầu", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "endTime", label: "Thời gian kết thúc", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "room", label: "Phòng học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "timeOfClass", label: "Số giờ dạy", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
@@ -573,7 +603,6 @@ export default {
       teacherId: {required},
       week: {required},
       dayOfWeek: {required},
-      timeOfDay: {required},
       building: {required},
       room: {required},
       timeOfClass: {required}
@@ -661,8 +690,6 @@ export default {
       if (isUpdate) {
         this.currentData = Object.assign({}, {
           ...classItem,
-          startTime: new Date(classItem.startTime),
-          birthday: new Date(classItem.birthday),
         });
       } else {
         this.currentData = Object.assign({}, {
@@ -700,6 +727,8 @@ export default {
         building: this.currentData.building,
         room: this.currentData.room,
         timeOfClass: this.currentData.timeOfClass,
+        startTime: this.currentData.startTime,
+        endTime: this.currentData.endTime,
       }
 
       if (this.isUpdate) {
@@ -809,6 +838,12 @@ export default {
                   case 'Số giờ trong tuần':
                     newAttribute = 'timeOfClass';
                     break;
+                  case 'Thời điểm bắt đầu':
+                    newAttribute = 'startTime';
+                    break;
+                  case 'Thời điểm kết thúc':
+                    newAttribute = 'endTime';
+                    break;
                   default:
                     break;
                 }
@@ -842,13 +877,15 @@ export default {
         newData.building = item.building ? item.building : null
         newData.room = item.room ? item.room : null
         newData.timeOfClass = item.timeOfClass ? item.timeOfClass : null
+        newData.startTime = item.startTime ? item.startTime : null
+        newData.endTime = item.endTime ? item.endTime : null
 
         this.uploadDataExcel.push({...newData})
       });
 
       this.loadingFile = true;
       const dataFiltered = this.uploadDataExcel.filter((item) => {
-        return item.fullName !== null;
+        return item.name !== null;
       });
 
       let res = await this.post('/class/upload-excel', {
