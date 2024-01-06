@@ -250,7 +250,7 @@
             <label>Tiết học trong ngày:</label>
             <b-form-input
                 id="input-time-of-day"
-                v-model="$v.currentData.timeOfDay.$model"
+                v-model="currentData.timeOfDay"
                 placeholder="Nhập tiết học trong ngày"
                 trim
             />
@@ -306,7 +306,7 @@
             <label>Thời gian bắt đầu:</label>
             <b-form-input
                 id="input-start-time"
-                v-model="$v.currentData.startTime.$model"
+                v-model="currentData.startTime"
                 placeholder="Nhập thời gian bắt đầu"
                 trim
             />
@@ -317,7 +317,7 @@
             <label>Thời gian kết thúc:</label>
             <b-form-input
                 id="input-end-time"
-                v-model="$v.currentData.endTime.$model"
+                v-model="currentData.endTime"
                 placeholder="Nhập thời gian kết thúc"
                 trim
             />
