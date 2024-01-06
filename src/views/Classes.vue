@@ -104,6 +104,9 @@
           <template #cell(endTime)="row">
             {{ row.item.endTime.length === 3 ? "0" + row.item.endTime : row.item.endTime }}
           </template>
+          <template #cell(languageId)="row">
+            {{ displayLanguage(row.item.languageId) }}
+          </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
               <a
@@ -325,6 +328,17 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
+            <label>Mã ngôn ngữ:</label>
+            <b-form-input
+                id="input-language-id"
+                v-model="currentData.languageId"
+                placeholder="Nhập mã ngôn ngữ"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
             <label>Giảng viên phụ trách<span class="text-danger">*</span>:</label>
             <b-form-input
                 id="input-teacher-id"
@@ -460,6 +474,7 @@ const initClass = {
   timeOfClass: null,
   startTime: null,
   endTime: null,
+  languageId: null,
 }
 
 const initNewDataExcel = {
@@ -477,6 +492,7 @@ const initNewDataExcel = {
   timeOfClass: null,
   startTime: null,
   endTime: null,
+  languageId: null,
 };
 
 export default {
@@ -525,6 +541,7 @@ export default {
         },
         {key: "name", label: "Lớp học", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "code", label: "Mã lớp học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "languageId", label: "Ngôn ngữ", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "semester",
           label: "Học kỳ",
@@ -729,6 +746,7 @@ export default {
         timeOfClass: this.currentData.timeOfClass,
         startTime: this.currentData.startTime,
         endTime: this.currentData.endTime,
+        languageId: this.currentData.languageId,
       }
 
       if (this.isUpdate) {
@@ -844,6 +862,9 @@ export default {
                   case 'Thời điểm kết thúc':
                     newAttribute = 'endTime';
                     break;
+                  case 'Ngôn ngữ':
+                    newAttribute = 'languageId';
+                    break;
                   default:
                     break;
                 }
@@ -879,6 +900,7 @@ export default {
         newData.timeOfClass = item.timeOfClass ? item.timeOfClass : null
         newData.startTime = item.startTime ? item.startTime : null
         newData.endTime = item.endTime ? item.endTime : null
+        newData.languageId = item.languageId ? item.languageId : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -918,6 +940,18 @@ export default {
     concatBuildingAndRoom(building, room) {
       if (building && room) {
         return building + "-" + room;
+      }
+      return "";
+    },
+    displayLanguage(languageId) {
+      if (languageId === 1) {
+        return "English";
+      }
+      if (languageId === 2) {
+        return "Vietnamese";
+      }
+      if (languageId === 3) {
+        return "French";
       }
       return "";
     }

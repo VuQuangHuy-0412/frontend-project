@@ -22,6 +22,9 @@
       <b-row v-if="timetablingTeacherStatus && timetablingTeacherStatus.status === 'PROCESSING'">
         <b-col md="12"><h6>Hệ thống đang thực hiện phân công giảng dạy</h6></b-col>
       </b-row>
+      <b-row v-if="timetablingTeacherStatus && timetablingTeacherStatus.status === 'FAILED'">
+        <b-col md="12"><h6>Hệ thống thực hiện phân công giảng dạy thất bại</h6></b-col>
+      </b-row>
       <b-row v-if="timetablingTeacherStatus && timetablingTeacherStatus.status === 'SUCCESS'">
         <b-col md="10"><h6>Hệ thống đã thực hiện phân công giảng dạy xong</h6></b-col>
         <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="exportTimetablingTeacher" style="border: none">
