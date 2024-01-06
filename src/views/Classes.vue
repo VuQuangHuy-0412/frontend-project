@@ -99,10 +99,10 @@
             {{ row.item.isAssigned === 1 ? "Đã phân công" : "Chưa phân công" }}
           </template>
           <template #cell(startTime)="row">
-            {{ row.item.startTime.length === 3 ? "0" + startTime : startTime }}
+            {{ row.item.startTime.length === 3 ? "0" + row.item.startTime : row.item.startTime }}
           </template>
           <template #cell(endTime)="row">
-            {{ row.item.endTime.length === 3 ? "0" + endTime : endTime }}
+            {{ row.item.endTime.length === 3 ? "0" + row.item.endTime : row.item.endTime }}
           </template>
           <template #cell(actions)="row" style="text-align: center">
             <div class="d-flex justify-content-center flex-wrap">
