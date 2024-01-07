@@ -78,6 +78,12 @@ const router = new Router({
       meta: { title: 'Quản lý học phần', layout: 'default' }
     },
     {
+      path: '/admin/datasets',
+      name: 'Datasets',
+      component: () => import("@/views/Datasets"),
+      meta: { title: 'Quản lý bộ dữ liệu', layout: 'default' }
+    },
+    {
       path: '/admin/constraints',
       name: 'Constraints',
       component: () => import("@/views/Constraints"),

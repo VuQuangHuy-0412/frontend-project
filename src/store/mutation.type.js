@@ -12,5 +12,6 @@ export const SET_STUDENTS_BY_TEACHER = 'setStudentsByTeacher'
 export const SET_CLASSES = 'setClass'
 export const SET_STUDENT_PROJECTS = 'setStudentProject'
 export const SET_SUBJECTS = 'setSubject'
+export const SET_DATASETS = 'setDataset'
 export const SET_CONSTRAINTS = 'setConstraint'
 

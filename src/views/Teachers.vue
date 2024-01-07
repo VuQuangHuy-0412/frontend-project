@@ -65,6 +65,13 @@
                 placeholder="Chọn"
             />
           </b-col>
+          <b-col md="2">
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
         </b-row>
         <b-row class="mb-2">
           <b-col md="8" style="margin-top: 30px">
@@ -239,47 +246,50 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Số giờ GD<span class="text-danger">*</span>:</label>
+            <label>Tổng số giờ GD<span class="text-danger">*</span>:</label>
+            <b-form-input
+                id="input-total-time"
+                v-model="$v.currentData.totalTime.$model"
+                placeholder="Nhập tổng số giờ GD"
+                trim
+                :class="{ 'is-invalid': validationStatus($v.currentData.totalTime) }"
+            />
+            <div v-if="!$v.currentData.totalTime.required" class="invalid-feedback">
+              Tổng số giờ GD không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Số giờ GD:</label>
             <b-form-input
                 id="input-gd-time"
-                v-model="$v.currentData.gdTime.$model"
+                v-model="currentData.gdTime"
                 placeholder="Nhập số giờ GD"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.gdTime) }"
             />
-            <div v-if="!$v.currentData.gdTime.required" class="invalid-feedback">
-              Số giờ GD không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Số giờ HD<span class="text-danger">*</span>:</label>
+            <label>Số giờ HD:</label>
             <b-form-input
                 id="input-hd-time"
-                v-model="$v.currentData.hdTime.$model"
+                v-model="currentData.hdTime"
                 placeholder="Nhập số giờ HD"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.hdTime) }"
             />
-            <div v-if="!$v.currentData.hdTime.required" class="invalid-feedback">
-              Số giờ HD không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Rating<span class="text-danger">*</span>:</label>
+            <label>Rating:</label>
             <b-form-input
-                id="input-gd-time"
-                v-model="$v.currentData.rating.$model"
+                id="input-rating"
+                v-model="currentData.rating"
                 placeholder="Nhập rating"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.rating) }"
             />
-            <div v-if="!$v.currentData.gdTime.required" class="invalid-feedback">
-              Rating không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -495,7 +505,7 @@ import PageTitle from "../Layout/Components/PageTitle";
 import DatePicker from "vue2-datepicker"
 import {
   ALL_GROUP_TEACHER,
-  CREATE_TEACHER,
+  CREATE_TEACHER, FETCH_DATASETS,
   FETCH_TEACHERS,
   UPDATE_TEACHER
 } from "@/store/action.type"
@@ -507,7 +517,7 @@ import router from '@/router';
 import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
-import {SET_ALL_GROUP_TEACHERS} from "@/store/mutation.type";
+import {SET_ALL_GROUP_TEACHERS, SET_DATASETS} from "@/store/mutation.type";
 
 const initData = {
   id: null,
@@ -517,6 +527,7 @@ const initData = {
   groupTeacher: null,
   startTimeFrom: null,
   startTimeTo: null,
+  dataset: 1,
   page: 1,
   pageSize: 20
 }
@@ -531,7 +542,9 @@ const initTeacher = {
   gdTime: null,
   hdTime: null,
   rating: null,
-  status: null
+  status: null,
+  totalTime: null,
+  dataset: null,
 }
 
 const initNewDataExcel = {
@@ -542,12 +555,15 @@ const initNewDataExcel = {
   gdTime: null,
   hdTime: null,
   rating: null,
-  status: null
+  status: null,
+  totalTime: null,
+  dataset: null,
 };
 
 const initNewDataExcelLanguageTeacher = {
   languageId: null,
   teacherId: null,
+  dataset: null,
 };
 
 export default {
@@ -610,6 +626,7 @@ export default {
         {key: "gdTime", label: "Số giờ GD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "hdTime", label: "Số giờ HD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "rating", label: "Rating", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "totalTime", label: "Tổng thời gian GD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "startTime",
           label: "Thời gian bắt đầu",
@@ -665,6 +682,7 @@ export default {
       dataExcel: [],
       dataExcelLanguageTeacher: [],
       selectedGroupTeacher: { value: null, text: "Tất cả" },
+      selectedDataset: null,
     }
   },
   validations: {
@@ -673,15 +691,14 @@ export default {
       rankAndDegree: {required},
       startTime: {required},
       birthday: {required},
-      gdTime: {required},
-      hdTime: {required},
-      rating: {required},
+      totalTime: {required},
       status: {required}
     },
   },
   mounted() {
     Promise.all([
-        this.fetchAllGroupTeachers()
+        this.fetchAllGroupTeachers(),
+        this.fetchAllDatasets()
     ]).then(() => {
       const dataSearch = this.$route.query.dataSearch;
 
@@ -692,6 +709,9 @@ export default {
         this.selectedStatus = this.optionsStatus.filter((i) => i.value === this.dataFilter.status)[0];
         this.selectedGroupTeacher = this.optionsGroupTeacher.filter(
             (i) => i.value === this.dataFilter.groupTeacher
+        )[0];
+        this.selectedDataset = this.selectedDataset.filter(
+            (i) => i.value === this.dataFilter.dataset
         )[0];
         this.startTimeFrom = this.dataFilter.startTimeFrom && new Date(this.dataFilter.startTimeFrom);
         this.startTimeTo = this.dataFilter.startTimeTo && new Date(moment(this.dataFilter.startTimeTo).subtract(1, 'day'));
@@ -705,7 +725,7 @@ export default {
   },
   watch: {},
   computed: {
-    ...mapGetters(["teachers", "allGroupTeachers"]),
+    ...mapGetters(["teachers", "allGroupTeachers", "datasets"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
     },
@@ -713,6 +733,9 @@ export default {
     },
     optionsGroupTeacher() {
       return this.formatOptionsGroupTeacher(this.allGroupTeachers);
+    },
+    optionsDataset() {
+      return this.formatOptionsDataset(this.datasets);
     }
   },
   methods: {
@@ -724,6 +747,7 @@ export default {
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
       this.dataFilter.groupTeacher = this.selectedGroupTeacher == null ? null : this.selectedGroupTeacher.value;
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedGroupTeacher.value;
     },
     reload() {
       this.fetchTeachers();
@@ -775,6 +799,7 @@ export default {
       this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
       this.selectedStatus = {value: null, text: 'Tất cả'};
       this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
+      this.selectedDataset = null;
       this.handleDataFilter();
       this.fetchTeachers();
     },
@@ -914,17 +939,14 @@ export default {
                   case 'Ngày sinh':
                     newAttribute = 'birthday';
                     break;
-                  case 'Số giờ GD':
-                    newAttribute = 'gdTime';
-                    break;
-                  case 'Số giờ HD':
-                    newAttribute = 'hdTime';
-                    break;
                   case 'Rating':
                     newAttribute = 'rating';
                     break;
                   case 'Trạng thái':
                     newAttribute = 'status';
+                    break;
+                  case 'Số giờ GD':
+                    newAttribute = 'totalTime';
                     break;
                   default:
                     break;
@@ -967,7 +989,8 @@ export default {
       });
 
       let res = await this.post('/teacher/upload-excel', {
-        teacherCreateRequests: dataFiltered
+        teacherCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset,
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -1009,11 +1032,34 @@ export default {
 
       return result;
     },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return []
+      let options = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      })
+
+      let result = []
+      result.push({...options[0]})
+      options.forEach(item => {
+        if (result && result.length > 0) {
+          if (result.map(child => child.value).indexOf(item.value) === -1) result.push(item)
+        }
+      })
+
+      return result;
+    },
     async fetchAllGroupTeachers() {
       let response = await this.$store.dispatch(ALL_GROUP_TEACHER);
 
       if (response && response.data) {
         this.$store.commit(SET_ALL_GROUP_TEACHERS, response.data);
+      }
+    },
+    async fetchAllDatasets() {
+      let response = await this.$store.dispatch(FETCH_DATASETS, null);
+
+      if (response && response.data) {
+        this.$store.commit(SET_DATASETS, response.data);
       }
     },
     concatGroupTeacher(groupTeacher) {
@@ -1077,11 +1123,11 @@ export default {
               if (json[0][indexValue]) {
                 let newAttribute = '';
                 switch (json[0][indexValue]) {
-                  case 'Mã ngôn ngữ':
-                    newAttribute = 'languageId';
+                  case 'Ngôn ngữ':
+                    newAttribute = 'languageName';
                     break;
-                  case 'Mã giảng viên':
-                    newAttribute = 'teacherId';
+                  case 'Tên giảng viên':
+                    newAttribute = 'teacherName';
                     break;
                   default:
                     break;
@@ -1118,7 +1164,8 @@ export default {
       });
 
       let res = await this.post('/language-teacher/upload-excel', {
-        languageTeacherCreateRequests: dataFiltered
+        languageTeacherCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset
       });
       setTimeout(() => {
         this.loadingFileLanguageTeacher = false;

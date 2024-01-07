@@ -45,6 +45,17 @@ export default {
       sidebarActive: false,
       menu: [
         {
+          title: "Quản lý bộ dữ liệu",
+          icon: 'fa fa-wallet',
+          child: [
+            {
+              href: "/admin/datasets",
+              title: "Danh sách bộ dữ liệu",
+              permission: 'dataset_search'
+            }
+          ],
+        },
+        {
           title: "Quản lý giảng viên",
           icon: 'fa fa-user',
           child: [

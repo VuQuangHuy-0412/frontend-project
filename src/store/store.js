@@ -14,6 +14,7 @@ import subject from "./subject.module"
 import constraint from "./constraint.module"
 import timetablingTeacher from "./timetablingteacher.module"
 import timetablingStudent from "./timetablingstudent.module"
+import dataset from "./dataset.module"
 
 Vue.use(Vuex);
 
@@ -33,5 +34,6 @@ export default new Vuex.Store({
     constraint,
     timetablingTeacher,
     timetablingStudent,
+    dataset,
   }
 });
