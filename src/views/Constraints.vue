@@ -19,6 +19,15 @@
               <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
             </multiselect>
           </b-col>
+          <b-col md="2">
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
@@ -139,9 +148,6 @@
             Không hoạt động
           </span>
           </template>
-          <!--          <template #cell(content)="row">-->
-          <!--            {{ concatGroupTeacher(row.item.groupTeacher) }}-->
-          <!--          </template>-->
           <template #cell(type)="row">
           <span v-if="row.item.type === 'class'">
             Giảng dạy
@@ -261,6 +267,22 @@
             </b-form-select>
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -332,6 +354,22 @@
             </b-form-select>
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentDataRequired.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentDataRequired.dataset)}"
+                v-model.trim="currentDataRequired.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentDataRequired.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -365,9 +403,11 @@ import {mapGetters} from "vuex";
 import {checkPermission} from "@/common/utils";
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
+import {required} from "vuelidate/lib/validators";
 
 const initData = {
   status: null,
+  dataset: null,
 }
 
 const initCustomConstraint = {
@@ -379,6 +419,7 @@ const initCustomConstraint = {
   classColumnCompare: null,
   classValueCompare: null,
   status: null,
+  dataset: null,
 }
 
 const initRequiredConstraint = {
@@ -387,6 +428,7 @@ const initRequiredConstraint = {
   value: null,
   status: null,
   type: null,
+  dataset: null,
 }
 
 export default {
@@ -442,6 +484,8 @@ export default {
         {value: '<=', text: 'Nhỏ hơn hoặc bằng'},
         {value: '!=', text: 'Khác'},
       ],
+      selectedDataset: {value: null, text: 'Tất cả'},
+      optionsDataset: [],
       fields: [
         {
           key: "key",
@@ -507,14 +551,27 @@ export default {
     }
   },
   validations: {
+    currentData: {
+      dataset: {required}
+    },
+    currentDataRequired: {
+      dataset: {required}
+    }
   },
   mounted() {
+    this.fetchAllDatasets();
+    this.handleDataFilter();
     const dataSearch = this.$route.query.dataSearch;
 
     if (dataSearch) {
       this.dataFilter = JSON.parse(String(dataSearch));
+      this.selectedDataset = this.optionsDataset.filter(
+          (i) => i.value === this.dataFilter.dataset
+      )[0];
+      this.selectedStatus = this.optionsStatus.filter(
+          (i) => i.value === this.dataFilter.status
+      )[0];
     }
-    this.handleDataFilter();
 
     this.fetchConstraints();
   },
@@ -533,6 +590,7 @@ export default {
   methods: {
     handleDataFilter() {
       this.dataFilter.status = this.selectedStatus === null ? null : this.selectedStatus.value;
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchConstraints();
@@ -556,6 +614,7 @@ export default {
         ...initData,
       });
       this.selectedStatus = {value: null, text: 'Tất cả'};
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchConstraints();
     },
@@ -620,6 +679,7 @@ export default {
         classColumnCompare: this.currentData.classColumnCompare,
         classValueCompare: this.currentData.classValueCompare,
         status: this.currentData.status,
+        dataset: this.currentData.dataset,
       }
 
       if (this.isUpdate) {
@@ -662,6 +722,7 @@ export default {
         value: this.currentDataRequired.value,
         status: this.currentData.status,
         type: this.currentData.type,
+        dataset: this.currentData.dataset,
       }
 
       if (this.isUpdate) {
@@ -705,7 +766,22 @@ export default {
         return column + " " + compare + " " + value;
       }
       return "";
-    }
+    },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return [];
+      const result = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      });
+
+      return [{value: null, text: 'Tất cả'}, ...result];
+    },
+    async fetchAllDatasets() {
+      let response = await this.get('/dataset/search');
+
+      if (response && response.data) {
+        this.optionsDataset = this.formatOptionsDataset(response.data.data);
+      }
+    },
   }
 }
 </script>

@@ -42,7 +42,8 @@ const mutations = {
 const actions = {
     [INPUT_DATA] (context, payload) {
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.getWithBigInt('/timetabling-teacher/input-data', '', {})
+            let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
+            let response = await baseMixins.methods.getWithBigInt('/timetabling-teacher/input-data' + params, '', {})
             if (response && response.data && response.status === SUCCESS) {
                 context.commit(SET_INPUT_DATA, response.data)
                 resolve(response.data)
@@ -53,7 +54,8 @@ const actions = {
     },
     [TIMETABLING_TEACHER_STATUS] (context, payload) {
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.getWithBigInt('/timetabling/teacher/status', '', {})
+            let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/teacher/status' + params, '', {})
             if (response && response.data && response.status === SUCCESS) {
                 context.commit(SET_TIMETABLING_TEACHER_STATUS, response.data)
                 resolve(response.data)
@@ -80,7 +82,7 @@ const actions = {
         })
     },
     [CREATE_FILE_TIMETABLING_TEACHER](context, params) {
-        baseMixins.methods.get('/admin/timetabling-teacher/list/excel', '', {params: null, responseType: 'blob'})
+        baseMixins.methods.get('/admin/timetabling-teacher/list/excel', '', {params: params, responseType: 'blob'})
             .then(({ data }) => {
                 const url = window.URL.createObjectURL(new Blob([data]));
                 const link = document.createElement('a');

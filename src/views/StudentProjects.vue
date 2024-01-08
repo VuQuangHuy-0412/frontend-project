@@ -25,10 +25,15 @@
             <b-input type="text" placeholder="Nhập mã sinh viên" v-model.trim="dataFilter.studentCode"/>
           </b-col>
           <b-col md="2">
-            <div class="label-form">Số giờ HD</div>
-            <b-input type="text" placeholder="Nhập số giờ HD" v-model.trim="dataFilter.timeHd"/>
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
           </b-col>
-          <b-col md="4" style="margin-top: 30px">
+        </b-row>
+        <b-row class="mb-2">
+          <b-col md="8" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
@@ -46,7 +51,7 @@
               Xóa lọc
             </b-button>
           </b-col>
-          <b-col md="12" class="text-right mt-30">
+          <b-col md="4" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('student_project_create')"
                 variant="primary"
@@ -174,66 +179,109 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Số giờ HD<span class="text-danger">*</span>:</label>
+            <label>Số giờ HD:</label>
             <b-form-input
                 id="input-class-id"
-                v-model="$v.currentData.timeHd.$model"
+                v-model="currentData.timeHd"
                 placeholder="Nhập số giờ HD"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.timeHd) }"
             />
-            <div v-if="!$v.currentData.timeHd.required" class="invalid-feedback">
-              Số giờ HD không được để trống.
-            </div>
           </b-form-group>
         </b-col>
 
         <b-col md="12">
           <b-form-group>
-            <label>Nguyện vọng 1<span class="text-danger">*</span>:</label>
+            <label>Nguyện vọng 1:</label>
             <b-form-input
-                id="input-teacher_1_id"
-                v-model="$v.currentData.teacher1Id.$model"
+                id="input-teacher-1-id"
+                v-model="currentData.teacher1Id"
                 placeholder="Nhập nguyện vọng 1"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher1Id) }"
             />
-            <div v-if="!$v.currentData.teacher1Id.required" class="invalid-feedback">
-              Nguyện vọng 1 không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Nguyện vọng 2<span class="text-danger">*</span>:</label>
+            <label>Nguyện vọng 2:</label>
             <b-form-input
-                id="input-teacher_2_id"
-                v-model="$v.currentData.teacher2Id.$model"
+                id="input-teacher-2-id"
+                v-model="currentData.teacher2Id"
                 placeholder="Nhập nguyện vọng 2"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher2Id) }"
             />
-            <div v-if="!$v.currentData.teacher2Id.required" class="invalid-feedback">
-              Nguyện vọng 2 không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Nguyện vọng 3<span class="text-danger">*</span>:</label>
+            <label>Nguyện vọng 3:</label>
             <b-form-input
-                id="input-teacher_3_id"
-                v-model="$v.currentData.teacher3Id.$model"
+                id="input-teacher-3-id"
+                v-model="currentData.teacher3Id"
                 placeholder="Nhập nguyện vọng 3"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacher3Id) }"
             />
-            <div v-if="!$v.currentData.teacher3Id.required" class="invalid-feedback">
-              Nguyện vọng 3 không được để trống.
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Giảng viên phụ trách:</label>
+            <b-form-input
+                id="input-teacher-assigned-id"
+                v-model="currentData.teacherAssignedId"
+                placeholder="Nhập giảng viên phụ trách"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Loại đồ án:</label>
+            <b-form-input
+                id="input-project-type"
+                v-model="currentData.projectType"
+                placeholder="Nhập loại đồ án"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Mã lớp đồ án:</label>
+            <b-form-input
+                id="input-class-id"
+                v-model="currentData.classId"
+                placeholder="Nhập mã lớp đồ án"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Tên đồ án:</label>
+            <b-form-input
+                id="input-project-name"
+                v-model="currentData.projectName"
+                placeholder="Nhập tên đồ án"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
             </div>
           </b-form-group>
         </b-col>
-
       </b-row>
       <template #modal-footer>
         <b-button
@@ -340,7 +388,7 @@ const initData = {
   id: null,
   name: null,
   studentCode: null,
-  timeHd: null,
+  dataset: null,
   page: 1,
   pageSize: 20
 }
@@ -355,17 +403,21 @@ const initStudentProject = {
   teacher2Id: null,
   teacher3Id: null,
   teacherAssignedId: null,
+  dataset: null,
+  projectType: null,
+  projectName: null,
+  classId: null,
 }
 
 const initNewDataExcel = {
   name: null,
   studentCode: null,
-  timeHd: null,
-  isAssigned: null,
-  teacher1Id: null,
-  teacher2Id: null,
-  teacher3Id: null,
-  teacherAssignedId: null,
+  teacher1Name: null,
+  teacher2Name: null,
+  teacher3Name: null,
+  projectType: null,
+  projectName: null,
+  classId: null,
 };
 
 export default {
@@ -388,6 +440,8 @@ export default {
         ...initData,
       }),
       selectedPageSize: {text: initData.pageSize},
+      selectedDataset: {value: null, text: 'Tất cả'},
+      optionsDataset: [],
       fields: [
         {
           key: "key",
@@ -408,6 +462,9 @@ export default {
         {key: "name", label: "Họ và tên", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
         {key: "studentCode", label: "Mã sinh viên", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "timeHd", label: "Số giờ HD", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "projectType", label: "Loại đồ án", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "projectName", label: "Tên đồ án", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "classId", label: "Mã lớp", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "isAssigned", label: "Trạng thái gán GV", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "teacher1Id", label: "Nguyện vọng 1", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "teacher2Id", label: "Nguyện vọng 2", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
@@ -440,13 +497,11 @@ export default {
     currentData: {
       name: {required},
       studentCode: {required},
-      timeHd: {required},
-      teacher1Id: {required},
-      teacher2Id: {required},
-      teacher3Id: {required},
+      dataset: {required},
     },
   },
   mounted() {
+    this.fetchAllDatasets();
     this.handleDataFilter();
     const dataSearch = this.$route.query.dataSearch;
 
@@ -454,6 +509,9 @@ export default {
       this.dataFilter = JSON.parse(String(dataSearch));
 
       this.selectedPageSize = {text: this.dataFilter.pageSize}
+      this.selectedDataset = this.optionsDataset.filter(
+          (i) => i.value === this.dataFilter.dataset
+      )[0];
     }
 
     this.fetchStudentProjects();
@@ -471,6 +529,7 @@ export default {
     handleDataFilter() {
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchStudentProjects();
@@ -515,6 +574,7 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchStudentProjects();
     },
@@ -551,11 +611,15 @@ export default {
         id: this.isUpdate ? this.currentData.id : null,
         name: this.currentData.name,
         studentCode: this.currentData.studentCode,
-        timeHd: this.currentData.studentCode,
+        timeHd: this.currentData.timeHd,
         teacher1Id: this.currentData.teacher1Id,
         teacher2Id: this.currentData.teacher2Id,
         teacher3Id: this.currentData.teacher3Id,
         teacherAssignedId: this.currentData.teacherAssignedId,
+        dataset: this.currentData.dataset,
+        projectType: this.currentData.projectType,
+        projectName: this.currentData.projectName,
+        classId: this.currentData.classId,
       }
 
       if (this.isUpdate) {
@@ -641,9 +705,6 @@ export default {
                   case 'Mã sinh viên':
                     newAttribute = 'studentCode';
                     break;
-                  case 'Số giờ HD':
-                    newAttribute = 'timeHd';
-                    break;
                   case 'Nguyện vọng 1':
                     newAttribute = 'teacher1Id';
                     break;
@@ -652,6 +713,15 @@ export default {
                     break;
                   case 'Nguyện vọng 3':
                     newAttribute = 'teacher3Id';
+                    break;
+                  case 'Loại đồ án':
+                    newAttribute = 'projectType';
+                    break;
+                  case 'Tên đồ án':
+                    newAttribute = 'projectName';
+                    break;
+                  case 'Mã lớp đồ án':
+                    newAttribute = 'classId';
                     break;
                   default:
                     break;
@@ -664,6 +734,7 @@ export default {
           });
     },
     async handleUploadDataExcel() {
+      this.handleDataFilter();
       if (!this.dataExcel || this.dataExcel.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -678,10 +749,12 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
         newData.studentCode = item.studentCode ? item.studentCode : null;
-        newData.timeHd = item.timeHd ? item.timeHd : null
         newData.teacher1Id = item.teacher1Id ? item.teacher1Id : null
         newData.teacher2Id = item.teacher2Id ? item.teacher2Id : null
         newData.teacher3Id = item.teacher3Id ? item.teacher3Id : null
+        newData.projectType = item.projectType ? item.projectType : null
+        newData.projectName = item.projectName ? item.projectName : null
+        newData.classId = item.classId ? item.classId : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -693,7 +766,8 @@ export default {
       });
 
       let res = await this.post('/student-project/upload-excel', {
-        studentProjectCreateRequests: dataFiltered
+        studentProjectCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset,
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -717,6 +791,21 @@ export default {
           this.closeModalUpload();
           this.fetchStudentProjects();
         }, 1000);
+      }
+    },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return [];
+      const result = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      });
+
+      return [{value: null, text: 'Tất cả'}, ...result];
+    },
+    async fetchAllDatasets() {
+      let response = await this.get('/dataset/search');
+
+      if (response && response.data) {
+        this.optionsDataset = this.formatOptionsDataset(response.data.data);
       }
     },
   }

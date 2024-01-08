@@ -41,8 +41,9 @@ const mutations = {
 
 const actions = {
     [INPUT_DATA_STUDENT] (context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.getWithBigInt('/timetabling-student/input-data', '', {})
+            let response = await baseMixins.methods.getWithBigInt('/timetabling-student/input-data' + params, '', {})
             if (response && response.data && response.status === SUCCESS) {
                 context.commit(SET_INPUT_DATA_STUDENT, response.data)
                 resolve(response.data)
@@ -52,8 +53,9 @@ const actions = {
         })
     },
     [TIMETABLING_STUDENT_STATUS] (context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.getWithBigInt('/timetabling/student/status', '', {})
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/student/status' + params, '', {})
             if (response && response.data && response.status === SUCCESS) {
                 context.commit(SET_TIMETABLING_STUDENT_STATUS, response.data)
                 resolve(response.data)
