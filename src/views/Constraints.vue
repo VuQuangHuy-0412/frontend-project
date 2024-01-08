@@ -39,6 +39,43 @@
             </b-button>
           </b-col>
         </b-row>
+
+        <b-row class="mb-2">
+          <b-col md="4"><h5 style="padding-top: 50px">Hàm mục tiêu phân công</h5></b-col>
+        </b-row>
+
+        <b-table
+            class="mt-3"
+            :items="constraints.objectiveFunctions"
+            :fields="visibleFieldsObjective"
+            :bordered="true"
+            :hover="true"
+            :fixed="true"
+            :foot-clone="false"
+        >
+          <template #table-colgroup="scope">
+            <col
+                v-for="field in scope.visibleFieldsObjective"
+                :key="field.key"
+            />
+          </template>
+          <template #cell(key)="row">
+            {{ row.index + 1 }}
+          </template>
+          <template #cell(status)="row">
+          <span v-if="row.item.status === 1">
+            Hoạt động
+          </span>
+            <span v-if="row.item.status === 0">
+            Không hoạt động
+          </span>
+          </template>
+        </b-table>
+        <b-row v-if="constraints.objectiveFunctions && constraints.objectiveFunctions.length === 0"
+               class="justify-content-center">
+          <span>Không tìm thấy bản ghi nào</span>
+        </b-row>
+
         <b-row class="mb-2">
           <b-col md="4"><h5 style="padding-top: 50px">Ràng buộc tùy chỉnh</h5></b-col>
           <b-col md="8" class="text-right mt-30">
@@ -486,6 +523,20 @@ export default {
       ],
       selectedDataset: {value: null, text: 'Tất cả'},
       optionsDataset: [],
+      fieldsObjective: [
+        {
+          key: "key",
+          label: "STT",
+          tdClass: 'align-middle',
+          thClass: 'align-middle',
+          visible: true,
+          thStyle: {width: '3%'}
+        },
+        {key: "code", label: "Mã mục tiêu", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
+        {key: "value", label: "Nội dung", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "status", label: "Trạng thái", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "type", label: "Loại phân công", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+      ],
       fields: [
         {
           key: "key",
@@ -580,6 +631,9 @@ export default {
     ...mapGetters(["constraints"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
+    },
+    visibleFieldsObjective() {
+      return this.fieldsObjective.filter((field) => field.visible);
     },
     visibleFieldsRequired() {
       return this.fieldsRequired.filter((field) => field.visible);
@@ -720,9 +774,9 @@ export default {
         id: this.isUpdate ? this.currentDataRequired.id : null,
         code: this.currentDataRequired.code,
         value: this.currentDataRequired.value,
-        status: this.currentData.status,
-        type: this.currentData.type,
-        dataset: this.currentData.dataset,
+        status: this.currentDataRequired.status,
+        type: this.currentDataRequired.type,
+        dataset: this.currentDataRequired.dataset,
       }
 
       if (this.isUpdate) {
