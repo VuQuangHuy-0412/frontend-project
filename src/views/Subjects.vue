@@ -24,16 +24,16 @@
             <div class="label-form">Mã học phần</div>
             <b-input type="text" placeholder="Nhập mã học phần" v-model.trim="dataFilter.code"/>
           </b-col>
-
-<!--          <b-col md="2">-->
-<!--            <div class="label-form">Học hàm học vị</div>-->
-<!--            <multiselect v-model="selectedRankAndDegree" track-by="text" label="text" :show-labels="false"-->
-<!--                         placeholder="Chọn" :options="optionsRankAndDegree" :searchable="true">-->
-<!--              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>-->
-<!--            </multiselect>-->
-<!--          </b-col>-->
-
-          <b-col md="4" style="margin-top: 30px">
+          <b-col md="2">
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col md="8" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
@@ -51,7 +51,7 @@
               Xóa lọc
             </b-button>
           </b-col>
-          <b-col md="2" class="text-right mt-30">
+          <b-col md="4" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('subject_create')"
                 variant="primary"
@@ -180,6 +180,22 @@
             </div>
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -286,6 +302,7 @@ const initData = {
   id: null,
   name: null,
   code: null,
+  dataset: null,
   page: 1,
   pageSize: 20
 }
@@ -295,12 +312,13 @@ const initSubject = {
   name: null,
   code: null,
   groupId: null,
+  dataset: null,
 }
 
 const initNewDataExcel = {
   name: null,
   code: null,
-  groupId: null,
+  groupName: null,
 };
 
 export default {
@@ -363,6 +381,8 @@ export default {
       isUpdate: false,
       uploadDataExcel: [],
       dataExcel: [],
+      selectedDataset: {value: null, text: 'Tất cả'},
+      optionsDataset: [],
     }
   },
   validations: {
@@ -370,9 +390,11 @@ export default {
       name: {required},
       code: {required},
       groupId: {required},
+      dataset: {required},
     },
   },
   mounted() {
+    this.fetchAllDatasets();
     this.handleDataFilter();
     const dataSearch = this.$route.query.dataSearch;
 
@@ -380,6 +402,9 @@ export default {
       this.dataFilter = JSON.parse(String(dataSearch));
 
       this.selectedPageSize = {text: this.dataFilter.pageSize}
+      this.selectedDataset = this.optionsDataset.filter(
+          (i) => i.value === this.dataFilter.dataset
+      )[0];
     }
 
     this.fetchSubjects();
@@ -397,6 +422,7 @@ export default {
     handleDataFilter() {
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchSubjects();
@@ -441,6 +467,7 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchSubjects();
     },
@@ -478,6 +505,7 @@ export default {
         name: this.currentData.name,
         code: this.currentData.code,
         groupId: this.currentData.groupId,
+        dataset: this.currentData.dataset,
       }
 
       if (this.isUpdate) {
@@ -564,7 +592,7 @@ export default {
                     newAttribute = 'code';
                     break;
                   case 'Nhóm chuyên môn':
-                    newAttribute = 'groupId';
+                    newAttribute = 'groupName';
                     break;
                   default:
                     break;
@@ -577,6 +605,7 @@ export default {
           });
     },
     async handleUploadDataExcel() {
+      this.handleDataFilter();
       if (!this.dataExcel || this.dataExcel.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -591,7 +620,7 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
         newData.code = item.code ? item.code : null;
-        newData.groupId = item.groupId ? item.groupId : null
+        newData.groupName = item.groupName ? item.groupName : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -602,7 +631,8 @@ export default {
       });
 
       let res = await this.post('/subject/upload-excel', {
-        subjectCreateRequests: dataFiltered
+        subjectCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset,
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -626,6 +656,21 @@ export default {
           this.closeModalUpload();
           this.fetchSubjects();
         }, 1000);
+      }
+    },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return [];
+      const result = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      });
+
+      return [{value: null, text: 'Tất cả'}, ...result];
+    },
+    async fetchAllDatasets() {
+      let response = await this.get('/dataset/search');
+
+      if (response && response.data) {
+        this.optionsDataset = this.formatOptionsDataset(response.data.data);
       }
     },
   }

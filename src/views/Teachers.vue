@@ -348,6 +348,22 @@
             </div>
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -527,7 +543,7 @@ const initData = {
   groupTeacher: null,
   startTimeFrom: null,
   startTimeTo: null,
-  dataset: 1,
+  dataset: null,
   page: 1,
   pageSize: 20
 }
@@ -552,18 +568,14 @@ const initNewDataExcel = {
   rankAndDegree: null,
   startTime: null,
   birthday: null,
-  gdTime: null,
-  hdTime: null,
   rating: null,
   status: null,
   totalTime: null,
-  dataset: null,
 };
 
 const initNewDataExcelLanguageTeacher = {
-  languageId: null,
-  teacherId: null,
-  dataset: null,
+  languageName: null,
+  teacherName: null,
 };
 
 export default {
@@ -682,7 +694,7 @@ export default {
       dataExcel: [],
       dataExcelLanguageTeacher: [],
       selectedGroupTeacher: { value: null, text: "Tất cả" },
-      selectedDataset: null,
+      selectedDataset: {value: null, text: 'Tất cả'},
     }
   },
   validations: {
@@ -692,7 +704,8 @@ export default {
       startTime: {required},
       birthday: {required},
       totalTime: {required},
-      status: {required}
+      status: {required},
+      dataset: {required},
     },
   },
   mounted() {
@@ -710,7 +723,7 @@ export default {
         this.selectedGroupTeacher = this.optionsGroupTeacher.filter(
             (i) => i.value === this.dataFilter.groupTeacher
         )[0];
-        this.selectedDataset = this.selectedDataset.filter(
+        this.selectedDataset = this.optionsDataset.filter(
             (i) => i.value === this.dataFilter.dataset
         )[0];
         this.startTimeFrom = this.dataFilter.startTimeFrom && new Date(this.dataFilter.startTimeFrom);
@@ -747,7 +760,7 @@ export default {
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
       this.dataFilter.groupTeacher = this.selectedGroupTeacher == null ? null : this.selectedGroupTeacher.value;
-      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedGroupTeacher.value;
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchTeachers();
@@ -799,7 +812,7 @@ export default {
       this.selectedRankAndDegree = {value: null, text: 'Tất cả'};
       this.selectedStatus = {value: null, text: 'Tất cả'};
       this.selectedGroupTeacher = {value: null, text: 'Tất cả'};
-      this.selectedDataset = null;
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchTeachers();
     },
@@ -846,6 +859,8 @@ export default {
         gdTime: this.currentData.gdTime,
         hdTime: this.currentData.hdTime,
         rating: this.currentData.rating,
+        totalTime: this.currentData.totalTime,
+        dataset: this.currentData.dataset,
         startTime: moment(this.currentData.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         birthday: moment(this.currentData.birthday).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       }
@@ -959,6 +974,7 @@ export default {
           });
     },
     async handleUploadDataExcel() {
+      this.handleDataFilter();
       if (!this.dataExcel || this.dataExcel.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -976,9 +992,8 @@ export default {
         newData.status = item.status ? item.status : null;
         newData.startTime = item.startTime ? item.startTime : null
         newData.birthday = item.birthday ? item.birthday : null
-        newData.gdTime = item.gdTime ? item.gdTime : null
-        newData.hdTime = item.hdTime ? item.hdTime : null
         newData.rating = item.rating ? item.rating : null
+        newData.totalTime = item.totalTime ? item.totalTime : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -1038,7 +1053,7 @@ export default {
         return {text: item.name, value: item.id}
       })
 
-      let result = []
+      let result = [{text: "Tất cả", value: null}]
       result.push({...options[0]})
       options.forEach(item => {
         if (result && result.length > 0) {
@@ -1140,6 +1155,7 @@ export default {
           });
     },
     async handleUploadDataExcelLanguageTeacher() {
+      this.handleDataFilter();
       if (!this.dataExcelLanguageTeacher || this.dataExcelLanguageTeacher.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -1152,8 +1168,8 @@ export default {
 
       this.dataExcelLanguageTeacher.forEach(item => {
         let newData = Object.assign({}, {...initNewDataExcelLanguageTeacher})
-        newData.languageId = item.languageId ? item.languageId : null;
-        newData.teacherId = item.teacherId ? item.teacherId : null;
+        newData.languageName = item.languageName ? item.languageName : null;
+        newData.teacherName = item.teacherName ? item.teacherName : null;
 
         this.uploadDataExcelLanguageTeacher.push({...newData})
       });

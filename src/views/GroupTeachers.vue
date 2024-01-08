@@ -20,7 +20,16 @@
             <div class="label-form">Nhóm chuyên môn</div>
             <b-input type="text" placeholder="Nhập tên nhóm chuyên môn" v-model.trim="dataFilter.name"/>
           </b-col>
-          <b-col md="4" style="margin-top: 30px">
+          <b-col md="2">
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col md="6" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
               Tìm kiếm
@@ -37,8 +46,16 @@
               <font-awesome-icon :icon="['fas', 'eraser']"/>
               Xóa lọc
             </b-button>
+            <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="openModalUploadGroupTeacherMapping"
+                      style="border: none">
+              <font-awesome-icon :icon="['fas','file-excel']"/>
+              <span v-if="!loadingFileGroupTeacherMapping"
+              ><i class="fas fa-upload"></i> Upload file giảng viên thuộc NCM
+              </span>
+              <i v-if="loadingFileGroupTeacherMapping" class="fa fa-spinner fa-spin"/>
+            </b-button>
           </b-col>
-          <b-col md="4" class="text-right mt-30">
+          <b-col md="6" class="text-right mt-30">
             <b-button
                 v-if="checkPermission('group_teacher_create')"
                 variant="primary"
@@ -169,6 +186,22 @@
             />
           </b-form-group>
         </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
       </b-row>
       <template #modal-footer>
         <b-button
@@ -252,6 +285,73 @@
         </div>
       </div>
     </b-modal>
+
+    <b-modal
+        id="modal-upload-group-teacher-mapping"
+        :modal-class="['sc5-modal']"
+        :header-class="['modal__header']"
+        :no-close-on-backdrop="true"
+        size="lg"
+        @hidden="closeModalUploadGroupTeacherMapping"
+    >
+      <template slot="modal-header">
+        <div class="modal__header--item title font-weight-500">
+          Upload file ds giảng viên thuộc nhóm chuyên môn
+        </div>
+        <div class="modal__header--item close-btn px-2" @click="closeModalUploadGroupTeacherMapping">
+          <i class="fas fa-times"></i>
+        </div>
+      </template>
+      <b-row>
+        <b-col md="2">
+          <div style="font-weight: bold">File mẫu</div>
+        </b-col>
+        <b-col md="6">
+          <a
+              :href="SAMPLE_GROUP_TEACHER_MAPPING_IMPORT_LINK"
+              target="_self"
+              style="font-weight: bold;color:black!important;"
+          >Format_ThemGVThuocNCM</a
+          >
+        </b-col>
+      </b-row>
+      <b-row class="mt-3">
+        <b-col md="2">
+          <div style="font-weight: bold">File đã upload</div>
+        </b-col>
+        <b-col md="6">
+          <div style="font-weight: bold; color:black!important;" v-if="currentFile">
+            {{ currentFile.name }} <i @click="handleResetFileGroupTeacherMapping" class="fas fa-times"
+                                      style="margin-left: 10px;cursor: pointer;margin-top: 2px;color: rgb(128,128,128)"></i>
+          </div>
+        </b-col>
+      </b-row>
+      <div class="py-2">
+        <b-form-group v-if="userInfo" class="mt-2">
+          <i class="fas fa-upload custom-upload"></i>
+          <div class="mr-4">
+            <b-form-file
+                id="input-file"
+                ref="fileExcelGroupTeacherMapping"
+                multiple
+                type="file"
+                accept=".xls, .xlsx"
+                placeholder="Kéo thả file hoặc"
+                browse-text="Chọn file"
+                @change="handleFilesUploadGroupTeacherMapping"
+            ></b-form-file>
+          </div>
+        </b-form-group>
+        <div style="width: 100%; text-align: center">
+          <b-button :disabled="!currentFileGroupTeacherMapping || loadingFileGroupTeacherMapping" variant="primary" class="py-2"
+                    style="margin-top: 90px;z-index: 1000;width: 200px" @click.prevent="handleUploadDataExcelGroupTeacherMapping">
+            <span v-if="!loadingFileGroupTeacherMapping"
+            > Xác nhận</span>
+            <i v-if="loadingFileGroupTeacherMapping" class="fa fa-spinner fa-spin mr-2"/>
+          </b-button>
+        </div>
+      </div>
+    </b-modal>
   </b-form>
 </template>
 <script>
@@ -263,17 +363,18 @@ import {
   UPDATE_GROUP_TEACHER
 } from "@/store/action.type"
 import {mapGetters} from "vuex";
-import {checkPermission, formatDate2, formatTime} from "@/common/utils";
+import {checkPermission} from "@/common/utils";
 import {PAGINATION_OPTIONS, SAMPLE_GROUP_TEACHER_IMPORT_LINK} from "@/common/config"
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
-import moment from 'moment-timezone';
 import {required} from "vuelidate/lib/validators";
 import * as XLSX from "xlsx";
+import {SAMPLE_GROUP_TEACHER_MAPPING_IMPORT_LINK} from "@/common/config";
 
 const initData = {
   id: null,
   name: null,
+  dataset: null,
   page: 1,
   pageSize: 20
 }
@@ -284,12 +385,19 @@ const initGroupTeacher = {
   description: null,
   leader: null,
   leaderInfo: null,
+  dataset: null,
 }
 
 const initNewDataExcel = {
   name: null,
   description: null,
-  leader: null,
+  leaderName: null,
+};
+
+const initNewDataExcelGroupTeacherMapping = {
+  teacherName: null,
+  groupName: null,
+  role: null,
 };
 
 export default {
@@ -299,9 +407,11 @@ export default {
   data() {
     return {
       loadingFile: false,
+      loadingFileGroupTeacherMapping: false,
       totalRow: 0,
       PAGINATION_OPTIONS,
       SAMPLE_GROUP_TEACHER_IMPORT_LINK,
+      SAMPLE_GROUP_TEACHER_MAPPING_IMPORT_LINK,
       subheading: "Quản lý danh sách nhóm chuyên môn.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
       heading: "Danh sách nhóm chuyên môn",
@@ -357,24 +467,35 @@ export default {
       isUpdate: false,
       uploadDataExcel: [],
       dataExcel: [],
+      selectedDataset: {value: null, text: 'Tất cả'},
+      optionsDataset: [],
+      currentFileGroupTeacherMapping: null,
+      currentDetailGroupTeacherMapping: null,
+      uploadDataExcelGroupTeacherMapping: [],
+      dataExcelGroupTeacherMapping: [],
     }
   },
   validations: {
     currentData: {
       name: {required},
+      dataset: {required},
     },
   },
   mounted() {
-    this.handleDataFilter();
-    const dataSearch = this.$route.query.dataSearch;
+      this.fetchAllDatasets();
+      this.handleDataFilter();
+      const dataSearch = this.$route.query.dataSearch;
 
-    if (dataSearch) {
-      this.dataFilter = JSON.parse(String(dataSearch));
+      if (dataSearch) {
+        this.dataFilter = JSON.parse(String(dataSearch));
 
-      this.selectedPageSize = {text: this.dataFilter.pageSize}
-    }
+        this.selectedPageSize = {text: this.dataFilter.pageSize}
+        this.selectedDataset = this.optionsDataset.filter(
+            (i) => i.value === this.dataFilter.dataset
+        )[0];
+      }
 
-    this.fetchGroupTeachers();
+      this.fetchGroupTeachers();
   },
   watch: {},
   computed: {
@@ -389,6 +510,7 @@ export default {
     handleDataFilter() {
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchGroupTeachers();
@@ -433,6 +555,7 @@ export default {
         ...initData,
         pageSize: this.dataFilter.pageSize,
       });
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchGroupTeachers();
     },
@@ -470,6 +593,7 @@ export default {
         name: this.currentData.name,
         description: this.currentData.description,
         leader: this.currentData.leader,
+        dataset: this.currentData.dataset,
       }
 
       if (this.isUpdate) {
@@ -556,7 +680,7 @@ export default {
                     newAttribute = 'description';
                     break;
                   case 'Người phụ trách':
-                    newAttribute = 'leader';
+                    newAttribute = 'leaderName';
                     break;
                   default:
                     break;
@@ -569,6 +693,7 @@ export default {
           });
     },
     async handleUploadDataExcel() {
+      this.handleDataFilter();
       if (!this.dataExcel || this.dataExcel.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -583,7 +708,7 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
         newData.description = item.description ? item.description : null;
-        newData.leader = item.leader ? item.leader : null
+        newData.leaderName = item.leaderName ? item.leaderName : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -594,7 +719,8 @@ export default {
       });
 
       let res = await this.post('/group-teacher/upload-excel', {
-        groupTeacherCreateRequests: dataFiltered
+        groupTeacherCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset,
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -617,6 +743,139 @@ export default {
         setTimeout(() => {
           this.closeModalUpload();
           this.fetchGroupTeachers();
+        }, 1000);
+      }
+    },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return [];
+      const result = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      });
+
+      return [{value: null, text: 'Tất cả'}, ...result];
+    },
+    async fetchAllDatasets() {
+      let response = await this.get('/dataset/search');
+
+      if (response && response.data) {
+        this.optionsDataset = this.formatOptionsDataset(response.data.data);
+      }
+    },
+    openModalUploadGroupTeacherMapping() {
+      this.$root.$emit("bv::show::modal", 'modal-upload-group-teacher-mapping')
+    },
+    closeModalUploadGroupTeacherMapping() {
+      this.currentDetailGroupTeacherMapping = null
+      this.currentFileGroupTeacherMapping = null
+      this.$root.$emit("bv::hide::modal", 'modal-upload-group-teacher-mapping')
+    },
+    handleResetFileGroupTeacherMapping() {
+      this.uploadDataExcelGroupTeacherMapping = []
+      this.dataExcelGroupTeacherMapping = []
+      this.currentFileGroupTeacherMapping = null
+      this.$nextTick(() => {
+        this.$refs.fileExcelGroupTeacherMapping.reset();
+      })
+    },
+    handleFilesUploadGroupTeacherMapping(event) {
+      this.dataExcelGroupTeacherMapping = [];
+      this.uploadDataExcelGroupTeacherMapping = [];
+      this.currentFileGroupTeacherMapping = null;
+      let uploadedFiles = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
+      if (!uploadedFiles) return;
+
+      this.currentFileGroupTeacherMapping = uploadedFiles;
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        const target = reader.result;
+        const wb = XLSX.read(target, {type: "array", cellDates: true});
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false});
+        this.handleFormatJSONFromExcelGroupTeacherMapping(data);
+      };
+      reader.readAsArrayBuffer(uploadedFiles);
+    },
+    handleFormatJSONFromExcelGroupTeacherMapping(json) {
+      if (!json || json.length <= 1) return;
+
+      this.dataExcelGroupTeacherMapping = json
+          .filter((item, index) => index !== 0)
+          .map((item, index) => {
+            let groupTeacherMapping = Object.assign({});
+
+            item.forEach((itemValue, indexValue) => {
+              if (json[0][indexValue]) {
+                let newAttribute = '';
+                switch (json[0][indexValue]) {
+                  case 'Tên giảng viên':
+                    newAttribute = 'teacherName';
+                    break;
+                  case 'Nhóm chuyên môn':
+                    newAttribute = 'groupName';
+                    break;
+                  case 'Vai trò':
+                    newAttribute = 'role';
+                    break;
+                  default:
+                    break;
+                }
+                groupTeacherMapping[newAttribute] = itemValue;
+              }
+            });
+
+            return groupTeacherMapping;
+          });
+    },
+    async handleUploadDataExcelGroupTeacherMapping() {
+      this.handleDataFilter();
+      if (!this.dataExcelGroupTeacherMapping || this.dataExcelGroupTeacherMapping.length === 0) {
+        this.$message({
+          message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
+          type: "warning",
+          showClose: true,
+        });
+        return
+      }
+      if (!this.dataExcelGroupTeacherMapping || this.dataExcelGroupTeacherMapping.length === 0) return null
+
+      this.dataExcelGroupTeacherMapping.forEach(item => {
+        let newData = Object.assign({}, {...initNewDataExcelGroupTeacherMapping})
+        newData.teacherName = item.teacherName ? item.teacherName : null;
+        newData.groupName = item.groupName ? item.groupName : null;
+        newData.role = item.role ? item.role : null
+
+        this.uploadDataExcelGroupTeacherMapping.push({...newData})
+      });
+
+      this.loadingFileGroupTeacherMapping = true;
+      const dataFiltered = this.uploadDataExcelGroupTeacherMapping;
+
+      let res = await this.post('/group-teacher-mapping/upload-excel', {
+        groupTeacherMappingCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset
+      });
+      setTimeout(() => {
+        this.loadingFileGroupTeacherMapping = false;
+      }, 300);
+
+      if (res.status === 200) {
+        this.$message({
+          message: 'Tải dữ liệu lên thành công.',
+          type: "success",
+          showClose: true,
+        });
+
+        this.uploadDataExcelGroupTeacherMapping = []
+        this.dataExcelGroupTeacherMapping = []
+        this.currentFileGroupTeacherMapping = null
+        this.$nextTick(() => {
+          this.$refs.fileExcelGroupTeacherMapping.reset();
+        })
+
+        setTimeout(() => {
+          this.closeModalUploadGroupTeacherMapping();
+          this.fetchGroupTeacherDetail();
         }, 1000);
       }
     },
@@ -645,6 +904,7 @@ export default {
   align-items: end;
   padding: 20px;
 }
+
 .custom-file-label::after {
   content: 'Chọn file' !important;
   position: relative !important;
@@ -659,6 +919,10 @@ export default {
 }
 
 #modal-upload-group-teacher .modal-footer {
+  display: none;
+}
+
+#modal-upload-group-teacher-mapping .modal-footer {
   display: none;
 }
 

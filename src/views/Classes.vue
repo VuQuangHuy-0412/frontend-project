@@ -35,7 +35,15 @@
             <div class="label-form">Học phần</div>
             <b-input type="text" placeholder="Nhập tên học phần" v-model.trim="dataFilter.subjectId"/>
           </b-col>
-
+          <b-col md="2">
+            <div class="label-form">Bộ dữ liệu</div>
+            <multiselect v-model="selectedDataset" track-by="text" label="text" :show-labels="false"
+                         placeholder="Chọn" :options="optionsDataset" :searchable="true">
+              <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
+            </multiselect>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
           <b-col md="4" style="margin-top: 30px">
             <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
               <font-awesome-icon :icon="['fas', 'search']"/>
@@ -220,32 +228,24 @@
 
         <b-col md="12">
           <b-form-group>
-            <label>Tuần học<span class="text-danger">*</span>:</label>
+            <label>Tuần học:</label>
             <b-form-input
                 id="input-week"
-                v-model="$v.currentData.week.$model"
+                v-model="currentData.week"
                 placeholder="Nhập tuần học"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.week) }"
             />
-            <div v-if="!$v.currentData.week.required" class="invalid-feedback">
-              Tuần học không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Ngày trong tuần<span class="text-danger">*</span>:</label>
+            <label>Ngày trong tuần:</label>
             <b-form-input
                 id="input-day-of-week"
-                v-model="$v.currentData.dayOfWeek.$model"
+                v-model="currentData.dayOfWeek"
                 placeholder="Nhập ngày học trong tuần"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.dayOfWeek) }"
             />
-            <div v-if="!$v.currentData.dayOfWeek.required" class="invalid-feedback">
-              Ngày học trong tuần không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -261,47 +261,35 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Tòa nhà<span class="text-danger">*</span>:</label>
+            <label>Tòa nhà:</label>
             <b-form-input
                 id="input-building"
-                v-model="$v.currentData.building.$model"
+                v-model="currentData.building"
                 placeholder="Nhập tòa nhà"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.code) }"
             />
-            <div v-if="!$v.currentData.building.required" class="invalid-feedback">
-              Tòa nhà không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Phòng học<span class="text-danger">*</span>:</label>
+            <label>Phòng học:</label>
             <b-form-input
                 id="input-room"
-                v-model="$v.currentData.room.$model"
+                v-model="currentData.room"
                 placeholder="Nhập phòng học"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.room) }"
             />
-            <div v-if="!$v.currentData.room.required" class="invalid-feedback">
-              Phòng học không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Số giờ trong tuần<span class="text-danger">*</span>:</label>
+            <label>Số giờ trong tuần:</label>
             <b-form-input
-                id="input-room"
-                v-model="$v.currentData.timeOfClass.$model"
+                id="input-time-of-class"
+                v-model="currentData.timeOfClass"
                 placeholder="Nhập số giờ trong tuần"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.timeOfClass) }"
             />
-            <div v-if="!$v.currentData.timeOfClass.required" class="invalid-feedback">
-              Số giờ trong tuần không được để trống.
-            </div>
           </b-form-group>
         </b-col>
         <b-col md="12">
@@ -339,17 +327,73 @@
         </b-col>
         <b-col md="12">
           <b-form-group>
-            <label>Giảng viên phụ trách<span class="text-danger">*</span>:</label>
+            <label>Số lượng sinh viên:</label>
+            <b-form-input
+                id="input-number-of-student"
+                v-model="currentData.numberOfStudent"
+                placeholder="Nhập số lượng sinh viên"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Số lượng tín chỉ:</label>
+            <b-form-input
+                id="input-number-of-credits"
+                v-model="currentData.numberOfCredits"
+                placeholder="Nhập số lượng tín chỉ"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Loại lớp học:</label>
+            <b-form-input
+                id="input-class-type"
+                v-model="currentData.classType"
+                placeholder="Nhập loại lớp học"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Chương trình:</label>
+            <b-form-input
+                id="input-class-type"
+                v-model="currentData.program"
+                placeholder="Nhập chương trình"
+                trim
+            />
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group :class="{'invalid-option': validationStatus($v.currentData.dataset)}">
+            <label>Bộ dữ liệu<span class="text-danger">*</span>:</label>
+            <b-form-select
+                :options="optionsDataset.filter(rank => rank.value != null)"
+                :searchable="true"
+                value-field="value" text-field="text"
+                :class="{'is-invalid-option': validationStatus($v.currentData.dataset)}"
+                v-model.trim="currentData.dataset"
+            >
+            </b-form-select>
+            <div v-if="!$v.currentData.dataset.required" class="invalid-feedback">
+              Bộ dữ liệu không được để trống.
+            </div>
+          </b-form-group>
+        </b-col>
+        <b-col md="12">
+          <b-form-group>
+            <label>Giảng viên phụ trách:</label>
             <b-form-input
                 id="input-teacher-id"
-                v-model="$v.currentData.teacherId.$model"
+                v-model="currentData.teacherId"
                 placeholder="Nhập giảng viên phụ trách"
                 trim
-                :class="{ 'is-invalid': validationStatus($v.currentData.teacherId) }"
             />
-            <div v-if="!$v.currentData.teacherId.required" class="invalid-feedback">
-              Giảng viên phụ trách không được để trống.
-            </div>
           </b-form-group>
         </b-col>
       </b-row>
@@ -454,6 +498,7 @@ const initData = {
   name: null,
   code: null,
   semester: null,
+  dataset: null,
   page: 1,
   pageSize: 20
 }
@@ -475,24 +520,29 @@ const initClass = {
   startTime: null,
   endTime: null,
   languageId: null,
+  numberOfStudent: null,
+  numberOfCredits: null,
+  classType: null,
+  program: null,
+  dataset: null
 }
 
 const initNewDataExcel = {
   name: null,
   code: null,
   semester: null,
-  subjectId: null,
+  subjectCode: null,
   week: null,
   dayOfWeek: null,
-  timeOfDay: null,
-  isAssigned: null,
-  teacherId: null,
+  languageName: null,
   building: null,
   room: null,
-  timeOfClass: null,
   startTime: null,
   endTime: null,
-  languageId: null,
+  numberOfStudent: null,
+  numberOfCredits: null,
+  classType: null,
+  program: null,
 };
 
 export default {
@@ -507,6 +557,8 @@ export default {
       totalRow: 0,
       PAGINATION_OPTIONS,
       SAMPLE_CLASS_IMPORT_LINK,
+      selectedDataset: {value: null, text: 'Tất cả'},
+      optionsDataset: [],
       subheading: "Quản lý danh sách lớp học.",
       icon: "pe-7s-portfolio icon-gradient bg-happy-itmeo",
       heading: "Danh sách lớp học",
@@ -581,6 +633,10 @@ export default {
         {key: "endTime", label: "Thời gian kết thúc", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "room", label: "Phòng học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {key: "timeOfClass", label: "Số giờ dạy", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "numberOfStudent", label: "Số lượng sinh viên", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "numberOfCredits", label: "Số tín chỉ", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "classType", label: "Loại lớp", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
+        {key: "program", label: "Chương trình", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
         {
           key: "teacherId",
           label: "Giảng viên phụ trách",
@@ -617,15 +673,11 @@ export default {
       code: {required},
       semester: {required},
       subjectId: {required},
-      teacherId: {required},
-      week: {required},
-      dayOfWeek: {required},
-      building: {required},
-      room: {required},
-      timeOfClass: {required}
+      dataset:{required},
     },
   },
   mounted() {
+    this.fetchAllDatasets();
     this.handleDataFilter();
     const dataSearch = this.$route.query.dataSearch;
 
@@ -635,6 +687,9 @@ export default {
       this.selectedSemester = this.optionsSemester.filter((i) => i.value === this.dataFilter.semester)[0];
 
       this.selectedPageSize = {text: this.dataFilter.pageSize}
+      this.selectedDataset = this.optionsDataset.filter(
+          (i) => i.value === this.dataFilter.dataset
+      )[0];
     }
 
     this.fetchClasses();
@@ -653,6 +708,7 @@ export default {
       this.dataFilter.semester = this.selectedSemester === null ? null : this.selectedSemester.value;
       this.dataFilter.page = 1;
       this.dataFilter.pageSize = this.selectedPageSize.text
+      this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.fetchClasses();
@@ -698,6 +754,7 @@ export default {
         pageSize: this.dataFilter.pageSize,
       });
       this.selectedSemester = {value: null, text: 'Tất cả'};
+      this.selectedDataset = {value: null, text: 'Tất cả'};
       this.handleDataFilter();
       this.fetchClasses();
     },
@@ -747,6 +804,11 @@ export default {
         startTime: this.currentData.startTime,
         endTime: this.currentData.endTime,
         languageId: this.currentData.languageId,
+        numberOfStudent: this.currentData.numberOfStudent,
+        numberOfCredits: this.currentData.numberOfCredits,
+        classType: this.currentData.classType,
+        program: this.currentData.program,
+        dataset: this.currentData.dataset,
       }
 
       if (this.isUpdate) {
@@ -836,16 +898,13 @@ export default {
                     newAttribute = 'semester';
                     break;
                   case 'Học phần':
-                    newAttribute = 'subjectId';
+                    newAttribute = 'subjectCode';
                     break;
                   case 'Tuần học':
                     newAttribute = 'week';
                     break;
                   case 'Ngày trong tuần':
                     newAttribute = 'dayOfWeek';
-                    break;
-                  case 'Tiết trong ngày':
-                    newAttribute = 'timeOfDay';
                     break;
                   case 'Tòa nhà':
                     newAttribute = 'building';
@@ -863,7 +922,19 @@ export default {
                     newAttribute = 'endTime';
                     break;
                   case 'Ngôn ngữ':
-                    newAttribute = 'languageId';
+                    newAttribute = 'languageName';
+                    break;
+                  case 'Số lượng sinh viên':
+                    newAttribute = 'numberOfStudent';
+                    break;
+                  case 'Số tín chỉ':
+                    newAttribute = 'numberOfCredits';
+                    break;
+                  case 'Loại lớp':
+                    newAttribute = 'classType';
+                    break;
+                  case 'Chương trình':
+                    newAttribute = 'program';
                     break;
                   default:
                     break;
@@ -876,6 +947,7 @@ export default {
           });
     },
     async handleUploadDataExcel() {
+      this.handleDataFilter();
       if (!this.dataExcel || this.dataExcel.length === 0) {
         this.$message({
           message: "Tải dữ liệu không thành công. Vui lòng kiểm tra lại file excel đã chọn",
@@ -891,16 +963,18 @@ export default {
         newData.name = item.name ? item.name : null;
         newData.code = item.code ? item.code : null;
         newData.semester = item.semester ? item.semester : null;
-        newData.subjectId = item.subjectId ? item.subjectId : null
+        newData.subjectCode = item.subjectCode ? item.subjectCode : null
         newData.week = item.week ? item.week : null
         newData.dayOfWeek = item.dayOfWeek ? item.dayOfWeek : null
-        newData.timeOfDay = item.timeOfDay ? item.timeOfDay : null
         newData.building = item.building ? item.building : null
         newData.room = item.room ? item.room : null
-        newData.timeOfClass = item.timeOfClass ? item.timeOfClass : null
         newData.startTime = item.startTime ? item.startTime : null
         newData.endTime = item.endTime ? item.endTime : null
-        newData.languageId = item.languageId ? item.languageId : null
+        newData.languageName = item.languageName ? item.languageName : null
+        newData.numberOfStudent = item.numberOfStudent ? item.numberOfStudent : null
+        newData.numberOfCredits = item.numberOfCredits ? item.numberOfCredits : null
+        newData.classType = item.classType ? item.classType : null
+        newData.program = item.program ? item.program : null
 
         this.uploadDataExcel.push({...newData})
       });
@@ -911,7 +985,8 @@ export default {
       });
 
       let res = await this.post('/class/upload-excel', {
-        classCreateRequests: dataFiltered
+        classCreateRequests: dataFiltered,
+        dataset: this.dataFilter.dataset,
       });
       setTimeout(() => {
         this.loadingFile = false;
@@ -954,7 +1029,22 @@ export default {
         return "French";
       }
       return "";
-    }
+    },
+    formatOptionsDataset(datasets) {
+      if (!datasets) return [];
+      const result = datasets.map((item) => {
+        return {text: item.name, value: item.id}
+      });
+
+      return [{value: null, text: 'Tất cả'}, ...result];
+    },
+    async fetchAllDatasets() {
+      let response = await this.get('/dataset/search');
+
+      if (response && response.data) {
+        this.optionsDataset = this.formatOptionsDataset(response.data.data);
+      }
+    },
   }
 }
 </script>
