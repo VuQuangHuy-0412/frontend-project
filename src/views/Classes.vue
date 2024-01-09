@@ -956,8 +956,7 @@ export default {
         newData.week = item.week ? item.week : null
         newData.dayOfWeek = item.dayOfWeek ? item.dayOfWeek : null
         newData.room = item.room ? item.room : null
-        newData.startTime = item.startTime ? item.startTime : null
-        newData.endTime = item.endTime ? item.endTime : null
+        newData.timeInDay = item.timeInDay ? item.timeInDay : null
         newData.languageName = item.languageName ? item.languageName : null
         newData.numberOfStudent = item.numberOfStudent ? item.numberOfStudent : null
         newData.numberOfCredits = item.numberOfCredits ? item.numberOfCredits : null
