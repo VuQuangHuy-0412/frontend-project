@@ -908,14 +908,8 @@ export default {
                   case 'Phòng học':
                     newAttribute = 'room';
                     break;
-                  case 'Số giờ trong tuần':
-                    newAttribute = 'timeOfClass';
-                    break;
-                  case 'Thời điểm bắt đầu':
-                    newAttribute = 'startTime';
-                    break;
-                  case 'Thời điểm kết thúc':
-                    newAttribute = 'endTime';
+                  case 'Thời gian trong ngày':
+                    newAttribute = 'timeInDay';
                     break;
                   case 'Ngôn ngữ':
                     newAttribute = 'languageName';
