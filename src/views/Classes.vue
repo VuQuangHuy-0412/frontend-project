@@ -535,7 +535,6 @@ const initNewDataExcel = {
   week: null,
   dayOfWeek: null,
   languageName: null,
-  building: null,
   room: null,
   startTime: null,
   endTime: null,
@@ -906,9 +905,6 @@ export default {
                   case 'Ngày trong tuần':
                     newAttribute = 'dayOfWeek';
                     break;
-                  case 'Tòa nhà':
-                    newAttribute = 'building';
-                    break;
                   case 'Phòng học':
                     newAttribute = 'room';
                     break;
@@ -966,7 +962,6 @@ export default {
         newData.subjectCode = item.subjectCode ? item.subjectCode : null
         newData.week = item.week ? item.week : null
         newData.dayOfWeek = item.dayOfWeek ? item.dayOfWeek : null
-        newData.building = item.building ? item.building : null
         newData.room = item.room ? item.room : null
         newData.startTime = item.startTime ? item.startTime : null
         newData.endTime = item.endTime ? item.endTime : null
