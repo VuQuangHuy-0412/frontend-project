@@ -749,9 +749,9 @@ export default {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.name = item.name ? item.name : null;
         newData.studentCode = item.studentCode ? item.studentCode : null;
-        newData.teacher1Id = item.teacher1Id ? item.teacher1Id : null
-        newData.teacher2Id = item.teacher2Id ? item.teacher2Id : null
-        newData.teacher3Id = item.teacher3Id ? item.teacher3Id : null
+        newData.teacher1Name = item.teacher1Name ? item.teacher1Name : null
+        newData.teacher1Name = item.teacher1Name ? item.teacher1Name : null
+        newData.teacher1Name = item.teacher1Name ? item.teacher1Name : null
         newData.projectType = item.projectType ? item.projectType : null
         newData.projectName = item.projectName ? item.projectName : null
         newData.classId = item.classId ? item.classId : null
