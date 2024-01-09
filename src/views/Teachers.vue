@@ -601,11 +601,6 @@ const initTeacher = {
 
 const initNewDataExcel = {
   fullName: null,
-  rankAndDegree: null,
-  startTime: null,
-  birthday: null,
-  rating: null,
-  status: null,
   totalTime: null,
 };
 
@@ -1012,21 +1007,6 @@ export default {
                   case 'Họ và tên':
                     newAttribute = 'fullName';
                     break;
-                  case 'Học hàm học vị':
-                    newAttribute = 'rankAndDegree';
-                    break;
-                  case 'Ngày bắt đầu':
-                    newAttribute = 'startTime';
-                    break;
-                  case 'Ngày sinh':
-                    newAttribute = 'birthday';
-                    break;
-                  case 'Rating':
-                    newAttribute = 'rating';
-                    break;
-                  case 'Trạng thái':
-                    newAttribute = 'status';
-                    break;
                   case 'Số giờ GD':
                     newAttribute = 'totalTime';
                     break;
@@ -1055,11 +1035,6 @@ export default {
       this.dataExcel.forEach(item => {
         let newData = Object.assign({}, {...initNewDataExcel})
         newData.fullName = item.fullName ? item.fullName : null;
-        newData.rankAndDegree = item.rankAndDegree ? item.rankAndDegree : null;
-        newData.status = item.status ? item.status : null;
-        newData.startTime = item.startTime ? item.startTime : null
-        newData.birthday = item.birthday ? item.birthday : null
-        newData.rating = item.rating ? item.rating : null
         newData.totalTime = item.totalTime ? item.totalTime : null
 
         this.uploadDataExcel.push({...newData})
