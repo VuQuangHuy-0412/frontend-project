@@ -536,8 +536,7 @@ const initNewDataExcel = {
   dayOfWeek: null,
   languageName: null,
   room: null,
-  startTime: null,
-  endTime: null,
+  timeInDay: null,
   numberOfStudent: null,
   numberOfCredits: null,
   classType: null,
@@ -914,7 +913,7 @@ export default {
                   case 'Ngôn ngữ':
                     newAttribute = 'languageName';
                     break;
-                  case 'Số lượng sinh viên':
+                  case 'Số lượng SV':
                     newAttribute = 'numberOfStudent';
                     break;
                   case 'Số tín chỉ':
