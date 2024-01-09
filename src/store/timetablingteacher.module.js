@@ -65,8 +65,9 @@ const actions = {
         })
     },
     [TIMETABLING_TEACHER](context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.post('/timetabling/teacher', payload)
+            let response = await baseMixins.methods.post('/timetabling/teacher' + params, null)
             resolve(response)
         })
     },

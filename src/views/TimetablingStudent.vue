@@ -410,6 +410,7 @@ export default {
       this.$root.$emit("bv::hide::modal", 'timetabling-student');
     },
     async handleTimetablingStudent() {
+      this.handleDataFilter()
       const res = await this.$store.dispatch(TIMETABLING_STUDENT, {
         dataset: this.dataFilter.dataset
       });

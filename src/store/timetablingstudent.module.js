@@ -65,8 +65,9 @@ const actions = {
         })
     },
     [TIMETABLING_STUDENT](context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
         return new Promise(async resolve => {
-            let response = await baseMixins.methods.post('/timetabling/student', payload)
+            let response = await baseMixins.methods.post('/timetabling/student' + params, null)
             resolve(response)
         })
     },

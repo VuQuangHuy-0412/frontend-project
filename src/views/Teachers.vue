@@ -103,6 +103,14 @@
           </b-col>
           <b-col md="4" class="text-right mt-30">
             <b-button
+                variant="primary"
+                class="mr-2 custom-btn-add-common"
+                style="border: none"
+                @click="openModalCalculateTimeCompartment()"
+            >
+              Tính toán số giờ GD và HD của GV
+            </b-button>
+            <b-button
                 v-if="checkPermission('teacher_create')"
                 variant="primary"
                 class="custom-btn-add-common"
@@ -204,6 +212,34 @@
         </b-row>
       </template>
     </b-card>
+
+    <b-modal
+        id="calculate-time"
+        :title="'Tính toán số giờ GD và HD cu GV'"
+        :no-close-on-backdrop="true"
+        size="lg"
+        @hidden="closeModalCalculateTimeCompartment"
+    >
+      <b-row>
+        <b-col md="12">
+          <h6>Bạn có chắc chắn muốn thực hiện tính toán số giờ GD và HD của GV?</h6>
+        </b-col>
+      </b-row>
+      <template #modal-footer>
+        <b-button
+            class="mr-2 btn-light2 pull-right"
+            @click="closeModalCalculateTimeCompartment"
+        >
+          Hủy
+        </b-button>
+        <b-button
+            variant="primary pull-right"
+            @click.prevent="handleCalculateTime"
+        >
+          Đồng ý
+        </b-button>
+      </template>
+    </b-modal>
 
     <b-modal
         id="update-teacher"
@@ -836,12 +872,18 @@ export default {
       }
       this.$root.$emit("bv::show::modal", 'update-teacher');
     },
+    openModalCalculateTimeCompartment() {
+      this.$root.$emit("bv::show::modal", 'calculate-time');
+    },
     closeModalCreateTeacherCompartment() {
       this.currentData = Object.assign({}, {...initTeacher})
       this.$nextTick(() => {
         this.$v.currentData.$reset();
       });
       this.$root.$emit("bv::hide::modal", 'update-teacher')
+    },
+    closeModalCalculateTimeCompartment() {
+      this.$root.$emit("bv::hide::modal", 'calculate-time')
     },
     validationStatus: function (validation) {
       return typeof validation != "undefined" ? validation.$error : false;
@@ -893,6 +935,31 @@ export default {
             this.fetchTeachers()
           }, 1000)
         }
+      }
+    },
+    async handleCalculateTime() {
+      this.handleDataFilter();
+      if (this.dataFilter.dataset != null) {
+        let params = '?dataset=' + this.dataFilter.dataset
+        let response = await this.post('/teacher/calculate-time' + params);
+        if (response && response.status === 200) {
+          clearTimeout(this.handleDelay)
+          this.handleDelay = setTimeout(() => {
+            this.$message({
+              message: 'Tính toán thời gian của giảng viên thành công',
+              type: "success",
+              showClose: true,
+            });
+            this.closeModalCalculateTimeCompartment()
+            this.fetchTeachers()
+          }, 1000)
+        }
+      } else {
+        this.$message({
+          message: "Vui lòng chọn bộ dữ liệu",
+          type: "warning",
+          showClose: true,
+        });
       }
     },
     openModalUploadTeacher() {
