@@ -215,7 +215,7 @@
 
     <b-modal
         id="calculate-time"
-        :title="'Tính toán số giờ GD và HD cu GV'"
+        :title="'Tính toán số giờ GD và HD của GV'"
         :no-close-on-backdrop="true"
         size="lg"
         @hidden="closeModalCalculateTimeCompartment"
