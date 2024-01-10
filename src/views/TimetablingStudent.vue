@@ -472,7 +472,10 @@ export default {
       return typeof validation != "undefined" ? validation.$error : false;
     },
     exportTimetablingStudent() {
-      this.$store.dispatch(CREATE_FILE_TIMETABLING_STUDENT, null);
+      this.handleDataFilter()
+      this.$store.dispatch(CREATE_FILE_TIMETABLING_STUDENT, {
+        dataset: this.dataFilter.dataset
+      });
     },
     formatOptionsDataset(datasets) {
       if (!datasets) return [];

@@ -498,7 +498,10 @@ export default {
       return typeof validation != "undefined" ? validation.$error : false;
     },
     exportTimetablingTeacher() {
-      this.$store.dispatch(CREATE_FILE_TIMETABLING_TEACHER, null);
+      this.handleDataFilter()
+      this.$store.dispatch(CREATE_FILE_TIMETABLING_TEACHER, {
+        dataset: this.dataFilter.dataset
+      });
     },
     formatOptionsDataset(datasets) {
       if (!datasets) return [];
