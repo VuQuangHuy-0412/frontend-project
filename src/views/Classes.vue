@@ -971,10 +971,16 @@ export default {
         return item.name !== null;
       });
 
-      let res = await this.post('/class/upload-excel', {
-        classCreateRequests: dataFiltered,
-        dataset: this.dataFilter.dataset,
-      });
+      const length = Math.floor(dataFiltered.length / 3500) + 1;
+
+      for (let i = 0; i < length; i++) {
+        const dataUpload = (i < (length - 1)) ? dataFiltered.slice(i * 3500, i * 3500 + 3500) : dataFiltered.slice(i * 3500, dataFiltered.length);
+        let res = await this.post('/class/upload-excel', {
+          classCreateRequests: dataUpload,
+          dataset: this.dataFilter.dataset,
+        });
+      }
+
       setTimeout(() => {
         this.loadingFile = false;
       }, 300);

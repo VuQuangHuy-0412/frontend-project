@@ -96,10 +96,22 @@ const router = new Router({
       meta: { title: 'Phân công giảng dạy', layout: 'default' }
     },
     {
+      path: '/admin/timetabling/teacher/result',
+      name: 'TimetablingTeacherResult',
+      component: () => import("@/views/TimetablingTeacherResult"),
+      meta: { title: 'Kết quả phân công giảng dạy', layout: 'default' }
+    },
+    {
       path: '/admin/timetabling/student',
       name: 'TimetablingStudent',
       component: () => import("@/views/TimetablingStudent"),
       meta: { title: 'Phân công hướng dẫn', layout: 'default' }
+    },
+    {
+      path: '/admin/timetabling/student/result',
+      name: 'TimetablingStudentResult',
+      component: () => import("@/views/TimetablingStudentResult"),
+      meta: { title: 'Kết quả phân công hướng dẫn', layout: 'default' }
     },
   ]
 });

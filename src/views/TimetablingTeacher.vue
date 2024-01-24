@@ -53,7 +53,7 @@
             <b-button variant="primary" class="mr-2 custom-btn-add-common" @click="exportTimetablingTeacher"
                       style="border: none">
               <font-awesome-icon :icon="['fas','file-excel']"/>
-              Xuất dữ liệu
+              Xuất dữ liệu phân công
             </b-button>
           </b-row>
         </template>
@@ -66,31 +66,10 @@
           <a-skeleton active :paragraph="{ rows: 5 }"></a-skeleton>
         </template>
         <template v-else>
-          <b-row class="mb-2">
-            <b-col md="2">
-              <div class="label-form">Giảng viên</div>
-              <multiselect v-model="selectedTeacher" track-by="text" label="text" :show-labels="false"
-                           placeholder="Chọn" :options="optionsTeacher" :searchable="true">
-                <template slot="singleLabel" slot-scope="{ option }">{{ option.text }}</template>
-              </multiselect>
-            </b-col>
-          </b-row>
-          <b-row class="mb-2">
-            <b-col md="4" style="margin-top: 30px">
-              <b-button variant="primary" class="mr-2" @click="handleSearch" type="submit">
-                <font-awesome-icon :icon="['fas', 'search']"/>
-                Tìm kiếm
-              </b-button>
-              <b-button class="mr-2" variant="light" @click="handleReset">
-                <font-awesome-icon :icon="['fas', 'eraser']"/>
-                Xóa lọc
-              </b-button>
-            </b-col>
-          </b-row>
-
+          <b-col md="12"><h6>Đánh giá kết quả sau phân công</h6></b-col>
           <b-table
               class="mt-3"
-              :items="classesByTeacher.data"
+              :items="evaluateResponse.data"
               :fields="visibleFields"
               :bordered="true"
               :hover="true"
@@ -103,30 +82,13 @@
                   :key="field.key"
               />
             </template>
-            <template #cell(key)="row">
+            <template #cell(stt)="row">
               {{ row.index + 1 }}
             </template>
-            <template #cell(room)="row">
-              {{ concatBuildingAndRoom(row.item.building, row.item.room) }}
-            </template>
-            <template #cell(actions)="row" style="text-align: center">
-              <div class="d-flex justify-content-center flex-wrap">
-                <a
-                    v-if="userInfo && userInfo.permissions.indexOf('class_update') !== -1"
-                    href="javascript:void(0)"
-                    class="m-1"
-                    type="button"
-                    title="Cập nhật giảng viên"
-                    v-b-tooltip.hover
-                    @click.prevent="openModalUpdateClassCompartment(row.item)">
-                  <font-awesome-icon :icon="['fas', 'edit']"/>
-                </a>
-              </div>
-            </template>
           </b-table>
-          <b-row v-if="classesByTeacher.data && classesByTeacher.data.length === 0"
+          <b-row v-if="evaluateResponse.data && evaluateResponse.data.length === 0"
                  class="justify-content-center">
-            <span>Không tìm thấy bản ghi nào</span>
+            <span>Không tìm thấy thông tin</span>
           </b-row>
         </template>
       </b-card>
@@ -160,46 +122,6 @@
           </b-button>
         </template>
       </b-modal>
-
-      <b-modal
-          id="update-class"
-          :title="'Cập nhật thông tin lớp học'"
-          :no-close-on-backdrop="true"
-          size="lg"
-          @hidden="closeModalUpdateClassCompartment"
-      >
-        <b-row>
-          <b-col md="12">
-            <b-form-group>
-              <label>Giảng viên phụ trách<span class="text-danger">*</span>:</label>
-              <b-form-input
-                  id="input-teacher-id"
-                  v-model="$v.currentData.teacherId.$model"
-                  placeholder="Nhập giảng viên phụ trách"
-                  trim
-                  :class="{ 'is-invalid': validationStatus($v.currentData.teacherId) }"
-              />
-              <div v-if="!$v.currentData.teacherId.required" class="invalid-feedback">
-                Giảng viên phụ trách không được để trống.
-              </div>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <template #modal-footer>
-          <b-button
-              class="mr-2 btn-light2 pull-right"
-              @click="closeModalUpdateClassCompartment"
-          >
-            Hủy
-          </b-button>
-          <b-button
-              variant="primary pull-right"
-              @click.prevent="handleUpdateClass"
-          >
-            Đồng ý
-          </b-button>
-        </template>
-      </b-modal>
     </div>
   </b-form>
 </template>
@@ -210,22 +132,15 @@ import {mapGetters} from "vuex";
 import {checkPermission} from "@/common/utils";
 import baseMixins from "../components/mixins/base";
 import router from '@/router';
-import {required} from "vuelidate/lib/validators";
 import {
   TIMETABLING_TEACHER,
   INPUT_DATA,
   TIMETABLING_TEACHER_STATUS,
-  FETCH_CLASSES_BY_TEACHER, UPDATE_CLASS, CREATE_FILE_TIMETABLING_TEACHER
+  FETCH_EVALUATE_RESPONSE, CREATE_FILE_TIMETABLING_STUDENT, CREATE_FILE_TIMETABLING_TEACHER
 } from "@/store/action.type";
 
 const initData = {
-  teacherId: null,
   dataset: null
-}
-
-const initClass = {
-  id: null,
-  teacherId: null,
 }
 
 export default {
@@ -243,102 +158,40 @@ export default {
       }),
       selectedDataset: {value: null, text: 'Tất cả'},
       optionsDataset: [],
-      currentData: Object.assign({}, {...initClass}),
       userInfo: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null,
       fields: [
         {
-          key: "key",
+          key: "stt",
           label: "STT",
           tdClass: 'align-middle',
           thClass: 'align-middle',
           visible: true,
           thStyle: {width: '3%'}
         },
-        {key: "id", label: "Mã lớp học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "name", label: "Lớp học", visible: true, thStyle: {width: '7%'}, thClass: 'align-middle'},
-        {key: "code", label: "Mã lớp học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {
-          key: "semester",
-          label: "Học kỳ",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {
-          key: "subjectId",
-          label: "Học phần",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {
-          key: "week",
-          label: "Tuần học",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {
-          key: "dayOfWeek",
-          label: "Ngày trong tuần",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {
-          key: "timeOfDay",
-          label: "Tiết trong ngày",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        },
-        {key: "room", label: "Phòng học", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {key: "timeOfClass", label: "Số giờ dạy", visible: true, thStyle: "width: 7%", thClass: 'align-middle'},
-        {
-          key: "actions",
-          label: "Chức năng",
-          visible: true,
-          thStyle: "width: 6%",
-          thClass: 'align-middle'
-        }
+        {key: "key", label: "Tiêu chí", visible: true, thStyle: "width: 60%", thClass: 'align-middle'},
+        {key: "value", label: "Giá trị", visible: true, thStyle: "width: 20%", thClass: 'align-middle'},
       ],
-      selectedTeacher: null,
-      optionsTeacher: []
     }
   },
   watch: {},
-  validations: {
-    currentData: {
-      teacherId: {required},
-    },
-  },
+  validations: {},
   mounted() {
-    Promise.all([
-      this.fetchAllDatasets(),
-    ]).then(() => {
-      const dataSearch = this.$route.query.dataSearch;
+    this.fetchAllDatasets();
+    const dataSearch = this.$route.query.dataSearch;
 
-      if (dataSearch) {
-        this.dataFilter = JSON.parse(String(dataSearch));
-        this.selectedDataset = this.optionsDataset.filter(
-            (i) => i.value === this.dataFilter.dataset
-        )[0];
-      }
-      this.fetchAllTeachers();
-      if (dataSearch) {
-        this.dataFilter = JSON.parse(String(dataSearch));
-        this.selectedTeacher = this.optionsTeacher.filter(
-            (i) => i.value === this.dataFilter.teacherId
-        )[0];
-      }
-      this.handleDataFilter();
-      this.fetchInputData()
-      this.fetchTimetablingTeacherStatus()
-      this.fetchClassesByTeacher();
-    })
+    if (dataSearch) {
+      this.dataFilter = JSON.parse(String(dataSearch));
+      this.selectedDataset = this.optionsDataset.filter(
+          (i) => i.value === this.dataFilter.dataset
+      )[0];
+    }
+    this.handleDataFilter();
+    this.fetchInputData()
+    this.fetchTimetablingTeacherStatus();
+    this.fetchEvaluateResponse();
   },
   computed: {
-    ...mapGetters(["inputData", "timetablingTeacherStatus", "classesByTeacher"]),
+    ...mapGetters(["inputData", "timetablingTeacherStatus", "evaluateResponse"]),
     visibleFields() {
       return this.fields.filter((field) => field.visible);
     },
@@ -347,19 +200,16 @@ export default {
   },
   methods: {
     handleDataFilter() {
-      this.dataFilter.teacherId = this.selectedTeacher == null ? 1 : this.selectedTeacher.value;
       this.dataFilter.dataset = this.selectedDataset == null ? null : this.selectedDataset.value;
     },
     reload() {
       this.handleDataFilter();
-      this.fetchAllTeachers()
       this.fetchInputData()
       this.fetchTimetablingTeacherStatus()
-      this.fetchClassesByTeacher();
+      this.fetchEvaluateResponse();
     },
-    async fetchClassesByTeacher() {
-      await this.$store.dispatch(FETCH_CLASSES_BY_TEACHER, {
-        teacherId: this.dataFilter.teacherId,
+    async fetchEvaluateResponse() {
+      await this.$store.dispatch(FETCH_EVALUATE_RESPONSE, {
         dataset: this.dataFilter.dataset
       });
       setTimeout(() => {
@@ -373,10 +223,9 @@ export default {
         path: '/admin/timetabling/teacher',
         query: {dataSearch: JSON.stringify(this.dataFilter)}
       })
-      this.fetchAllTeachers()
       this.fetchInputData()
       this.fetchTimetablingTeacherStatus()
-      this.fetchClassesByTeacher();
+      this.fetchEvaluateResponse();
     },
     handleReset() {
       this.$router.replace('/admin/timetabling/teacher')
@@ -384,30 +233,11 @@ export default {
         ...initData,
       });
       this.handleDataFilter();
-      this.fetchAllTeachers();
       this.fetchInputData()
       this.fetchTimetablingTeacherStatus()
-      this.fetchClassesByTeacher();
-    },
-    async fetchAllTeachers() {
-      let params = this.dataFilter.dataset != null ? '?dataset=' + this.dataFilter.dataset : ''
-      let response = await this.get('/teacher/all' + params);
-
-      if (response && response.data) {
-        this.optionsTeacher = this.formatOptionsTeacher(response.data.data);
-      }
+      this.fetchEvaluateResponse();
     },
     checkPermission,
-    formatOptionsTeacher(teachers) {
-      if (!teachers) return [];
-      const result = teachers.map((item) => {
-        return {text: item.fullName, value: item.id}
-      });
-
-      this.selectedTeacher = result[0]
-
-      return result;
-    },
     async fetchInputData() {
       await this.$store.dispatch(INPUT_DATA, {
         dataset: this.dataFilter.dataset
@@ -445,63 +275,18 @@ export default {
           this.closeModalTimetablingTeacherCompartment()
           this.fetchInputData()
           this.fetchTimetablingTeacherStatus()
-          this.fetchClassesByTeacher()
+          this.fetchEvaluateResponse()
         }, 1000)
       }
-    },
-    concatBuildingAndRoom(building, room) {
-      if (building && room) {
-        return building + "-" + room;
-      }
-      return "";
-    },
-    openModalUpdateClassCompartment(classItem) {
-      this.currentData = Object.assign({}, {
-        ...classItem,
-      });
-      this.$root.$emit("bv::show::modal", 'update-class');
-    },
-    closeModalUpdateClassCompartment() {
-      this.currentData = Object.assign({}, {...initClass})
-      this.$nextTick(() => {
-        this.$v.currentData.$reset();
-      });
-      this.$root.$emit("bv::hide::modal", 'update-class')
-    },
-    async handleUpdateClass() {
-      this.$v.$reset();
-      this.$v.$touch();
-
-      if (this.$v.currentData.$invalid) return
-      const payload = {
-        id: this.currentData.id,
-        teacherId: this.currentData.teacherId,
-      }
-
-      const res = await this.$store.dispatch(UPDATE_CLASS, payload)
-      if (res && res.status === 200) {
-        clearTimeout(this.handleDelay)
-        this.handleDelay = setTimeout(() => {
-          this.$message({
-            message: 'Cập nhật thông tin lớp học thành công',
-            type: "success",
-            showClose: true,
-          });
-          this.closeModalUpdateClassCompartment()
-          this.fetchInputData()
-          this.fetchTimetablingTeacherStatus()
-          this.fetchClassesByTeacher()
-        }, 1000)
-      }
-    },
-    validationStatus: function (validation) {
-      return typeof validation != "undefined" ? validation.$error : false;
     },
     exportTimetablingTeacher() {
       this.handleDataFilter()
       this.$store.dispatch(CREATE_FILE_TIMETABLING_TEACHER, {
         dataset: this.dataFilter.dataset
       });
+    },
+    validationStatus: function (validation) {
+      return typeof validation != "undefined" ? validation.$error : false;
     },
     formatOptionsDataset(datasets) {
       if (!datasets) return [];
@@ -535,39 +320,5 @@ export default {
 }
 </style>
 <style>
-.custom-file-label {
-  height: 120px;
-  border: 1px dashed #01904a;
-  justify-content: center;
-  display: flex;
-  align-items: end;
-  padding: 20px;
-}
 
-.custom-file-label::after {
-  content: 'Chọn file' !important;
-  position: relative !important;
-  background: none;
-  border: none;
-  padding: 0;
-  height: unset;
-  margin-left: 5px;
-  color: #01904a;
-  font-weight: bold;
-  font-size: 15px;
-}
-
-.custom-upload {
-  font-size: 35px;
-  color: #01904a;
-  position: absolute;
-  z-index: 1000;
-  top: 120px;
-  left: 46%;
-}
-
-.custom-file-label {
-  font-weight: bold;
-  font-size: 15px;
-}
 </style>

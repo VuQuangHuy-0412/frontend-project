@@ -1,9 +1,20 @@
-import {SET_STUDENTS_BY_TEACHER, SET_INPUT_DATA_STUDENT, SET_TIMETABLING_STUDENT_STATUS} from "@/store/mutation.type";
+import {
+    SET_EVALUATE_STUDENT_RESPONSE,
+    SET_INPUT_DATA_STUDENT,
+    SET_STUDENTS_BY_TEACHER,
+    SET_TIMETABLING_STUDENT_RESPONSE,
+    SET_TIMETABLING_STUDENT_STATUS
+} from "@/store/mutation.type";
 import {SUCCESS} from "@/common/config"
 import baseMixins from "../components/mixins/base"
 import {
-    CREATE_FILE_TIMETABLING_STUDENT, CREATE_FILE_TIMETABLING_TEACHER,
+    CREATE_FILE_TIMETABLING_STUDENT,
+    CREATE_FILE_TIMETABLING_STUDENT_RESULT,
+    CREATE_FILE_TIMETABLING_TEACHER,
+    CREATE_FILE_TIMETABLING_TEACHER_RESULT,
+    FETCH_EVALUATE_STUDENT_RESPONSE,
     FETCH_STUDENTS_BY_TEACHER,
+    FETCH_TIMETABLING_STUDENT_RESPONSE,
     INPUT_DATA_STUDENT,
     TIMETABLING_STUDENT,
     TIMETABLING_STUDENT_STATUS
@@ -13,6 +24,8 @@ const state = {
     inputDataStudent: null,
     timetablingStudentStatus: null,
     studentsByTeacher: [],
+    evaluateStudentResponse: [],
+    timetablingStudentResponse: [],
 }
 
 const getters = {
@@ -24,6 +37,12 @@ const getters = {
     },
     studentsByTeacher(state) {
         return state.studentsByTeacher
+    },
+    evaluateStudentResponse(state) {
+        return state.evaluateStudentResponse
+    },
+    timetablingStudentResponse(state) {
+        return state.timetablingStudentResponse
     }
 }
 
@@ -36,6 +55,12 @@ const mutations = {
     },
     [SET_STUDENTS_BY_TEACHER] (state, payload) {
         state.studentsByTeacher = payload
+    },
+    [SET_EVALUATE_STUDENT_RESPONSE] (state, payload) {
+        state.evaluateStudentResponse = payload
+    },
+    [SET_TIMETABLING_STUDENT_RESPONSE] (state, payload) {
+        state.timetablingStudentResponse = payload
     }
 }
 
@@ -83,12 +108,48 @@ const actions = {
         })
     },
     [CREATE_FILE_TIMETABLING_STUDENT](context, params) {
-        baseMixins.methods.get('/admin/timetabling-student/list/excel', '', {params: null, responseType: 'blob'})
+        baseMixins.methods.get('/admin/timetabling-student/list/excel', '', {params: params, responseType: 'blob'})
             .then(({ data }) => {
                 const url = window.URL.createObjectURL(new Blob([data]));
                 const link = document.createElement('a');
                 link.href = url;
                 link.setAttribute('download', "student_timetabling.xlsx");
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(({ error }) => error);
+    },
+    [FETCH_EVALUATE_STUDENT_RESPONSE] (context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/student/evaluate' + params, '', {})
+            if (response && response.data && response.status === SUCCESS) {
+                context.commit(SET_EVALUATE_STUDENT_RESPONSE, response.data)
+                resolve(response.data)
+            } else {
+                resolve(null)
+            }
+        })
+    },
+    [FETCH_TIMETABLING_STUDENT_RESPONSE] (context, payload) {
+        let params = (payload.dataset != null && payload.teacherId != null) ? '?dataset=' + payload.dataset + '&teacherId=' + payload.teacherId : ''
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/student/timetable' + params, '', {})
+            if (response && response.data && response.status === SUCCESS) {
+                context.commit(SET_TIMETABLING_STUDENT_RESPONSE, response.data)
+                resolve(response.data)
+            } else {
+                resolve(null)
+            }
+        })
+    },
+    [CREATE_FILE_TIMETABLING_STUDENT_RESULT](context, params) {
+        baseMixins.methods.get('/admin/timetabling-student-result/list/excel', '', {params: params, responseType: 'blob'})
+            .then(({ data }) => {
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', "teacher_student.xlsx");
                 document.body.appendChild(link);
                 link.click();
             })

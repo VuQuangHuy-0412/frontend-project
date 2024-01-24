@@ -1,9 +1,15 @@
-import {SET_CLASSES_BY_TEACHER, SET_INPUT_DATA, SET_TIMETABLING_TEACHER_STATUS} from "@/store/mutation.type";
+import {
+    SET_CLASSES_BY_TEACHER,
+    SET_EVALUATE_RESPONSE,
+    SET_INPUT_DATA, SET_TIMETABLING_RESPONSE,
+    SET_TIMETABLING_TEACHER_STATUS
+} from "@/store/mutation.type";
 import {SUCCESS} from "@/common/config"
 import baseMixins from "../components/mixins/base"
 import {
-    CREATE_FILE_TIMETABLING_TEACHER,
+    CREATE_FILE_TIMETABLING_TEACHER, CREATE_FILE_TIMETABLING_TEACHER_RESULT,
     FETCH_CLASSES_BY_TEACHER,
+    FETCH_EVALUATE_RESPONSE, FETCH_TIMETABLING_RESPONSE,
     INPUT_DATA,
     TIMETABLING_TEACHER,
     TIMETABLING_TEACHER_STATUS
@@ -13,6 +19,8 @@ const state = {
     inputData: null,
     timetablingTeacherStatus: null,
     classesByTeacher: [],
+    evaluateResponse: [],
+    timetablingResponse: [],
 }
 
 const getters = {
@@ -24,6 +32,12 @@ const getters = {
     },
     classesByTeacher(state) {
         return state.classesByTeacher
+    },
+    evaluateResponse(state) {
+        return state.evaluateResponse
+    },
+    timetablingResponse(state) {
+        return state.timetablingResponse
     }
 }
 
@@ -36,6 +50,12 @@ const mutations = {
     },
     [SET_CLASSES_BY_TEACHER] (state, payload) {
         state.classesByTeacher = payload
+    },
+    [SET_EVALUATE_RESPONSE] (state, payload) {
+        state.evaluateResponse = payload
+    },
+    [SET_TIMETABLING_RESPONSE] (state, payload) {
+        state.timetablingResponse = payload
     }
 }
 
@@ -89,6 +109,42 @@ const actions = {
                 const link = document.createElement('a');
                 link.href = url;
                 link.setAttribute('download', "class_timetabling.xlsx");
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch(({ error }) => error);
+    },
+    [FETCH_EVALUATE_RESPONSE] (context, payload) {
+        let params = payload.dataset != null ? '?dataset=' + payload.dataset : ''
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/teacher/evaluate' + params, '', {})
+            if (response && response.data && response.status === SUCCESS) {
+                context.commit(SET_EVALUATE_RESPONSE, response.data)
+                resolve(response.data)
+            } else {
+                resolve(null)
+            }
+        })
+    },
+    [FETCH_TIMETABLING_RESPONSE] (context, payload) {
+        let params = (payload.dataset != null && payload.teacherId != null) ? '?dataset=' + payload.dataset + '&teacherId=' + payload.teacherId : ''
+        return new Promise(async resolve => {
+            let response = await baseMixins.methods.getWithBigInt('/timetabling/teacher/timetable' + params, '', {})
+            if (response && response.data && response.status === SUCCESS) {
+                context.commit(SET_TIMETABLING_RESPONSE, response.data)
+                resolve(response.data)
+            } else {
+                resolve(null)
+            }
+        })
+    },
+    [CREATE_FILE_TIMETABLING_TEACHER_RESULT](context, params) {
+        baseMixins.methods.get('/admin/timetabling-teacher-result/list/excel', '', {params: params, responseType: 'blob'})
+            .then(({ data }) => {
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', "teacher_timetable.xlsx");
                 document.body.appendChild(link);
                 link.click();
             })

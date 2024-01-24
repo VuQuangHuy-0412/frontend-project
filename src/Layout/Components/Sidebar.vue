@@ -131,10 +131,20 @@ export default {
               permission: 'timetabling_teacher'
             },
             {
+              href: "/admin/timetabling/teacher/result",
+              title: "Kết quả phân công giảng dạy",
+              permission: 'timetabling_teacher_result'
+            },
+            {
               href: "/admin/timetabling/student",
               title: "Phân công hướng dẫn",
               permission: 'timetabling_student'
-            }
+            },
+            {
+              href: "/admin/timetabling/student/result",
+              title: "Kết quả phân công hướng dẫn",
+              permission: 'timetabling_student_result'
+            },
           ],
         },
         {
